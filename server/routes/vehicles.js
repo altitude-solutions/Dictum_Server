@@ -83,6 +83,28 @@ app.get('/vehi', verifyToken, (req, res) => {
 });
 
 // ===============================================
+// Update vehicle
+// ===============================================
+app.put('/vehi/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['movil', 'placa', 'tipo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
+                                 'cargaToneladas', 'cargaMetrocCubicos', 'litros', 'marca', 'modelo',
+                                 'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
+                                 'motor', 'turbo', 'chasis', 'serie', 'color']);
+    let id = req.params.id;
+
+    Vehiculo.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, dbVehi) => {
+        if(err){
+            return res.status(400).json({
+                err
+            });
+        }
+        res.json({
+            vehicle: dbVehi
+        });
+    });
+});
+
+// ===============================================
 // Delete user
 // ===============================================
 app.delete('/vehi/:id', verifyToken, (req, res) => {

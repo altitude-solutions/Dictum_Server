@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
+const _ = require('underscore');
 // ===============================================
 // Employee model
 // ===============================================
@@ -87,6 +88,29 @@ app.get('/users', verifyToken, (req, res) => {
                 });
             });
         });
+});
+
+// ===============================================
+// Update user
+// ===============================================
+app.put('/users/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['nombreUsuario', 'permisos', 'contra', 'empresa']);
+    let id = req.params.id;
+
+    if(body.contra) {
+        body.contra = bcrypt.hashSync(body.contra, 10);
+    }
+
+    Usuario.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, dbUser) => {
+        if(err){
+            return res.status(400).json({
+                err
+            });
+        }
+        res.json({
+            user: dbUser
+        });
+    });
 });
 
 // ===============================================

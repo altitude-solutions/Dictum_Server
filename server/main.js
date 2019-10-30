@@ -2,7 +2,7 @@
 // Server main file
 // ===============================================
 // Config
-require('./config/config');
+let {disconnectDB} = require('./config/config');
 // Express server
 const express = require('express');
 // Http server
@@ -33,4 +33,9 @@ app.use(require('./routes/index'));
 // ============================
 server.listen(process.env.PORT, () => {
     console.log('Server online', process.env.PORT);
+});
+
+process.on('SIGINT', function() {
+    disconnectDB();
+    process.exit();
 });

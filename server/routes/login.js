@@ -22,7 +22,7 @@ app.post('/login', (req, res) => {
             }
         })
     }
-    // Look for employee in the database
+    // Look for user in the database
     Usuario.findOne({ nombreUsuario: body.nombreUsuario }, (err, dbUser) => {
         // If an error occurs send internal server error
         if (err) {
@@ -30,16 +30,16 @@ app.post('/login', (req, res) => {
                 err
             });
         }
-        // If no employee is found send not found error
+        // If no user is found send not found error
         if (!dbUser) {
             return res.status(404).json({
                 err: {
-                    message: 'Usuario o contraseña incorrectos'
+                    message: '(Usuario) o contraseña incorrectos'
                 }
             });
         }
         // If the password does not match send not found error
-        if (!bcrypt.compareSync(body.contra, employeeDB.contra)) {
+        if (!bcrypt.compareSync(body.contra, dbUser.contra)) {
             return res.status(404).json({
                 err: {
                     message: 'Usuario o contraseña incorrectos'

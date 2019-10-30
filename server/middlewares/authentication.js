@@ -15,7 +15,7 @@ let verifyToken = (req, res, next) => {
                 }
             });
         } else {
-            req.employee = decoded.employee;
+            req.user = decoded.user;
             next();
         }
     });

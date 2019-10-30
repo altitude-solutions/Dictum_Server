@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const _ = require('underscore');
 // ===============================================
 // Employee model
 // ===============================================
@@ -10,6 +11,7 @@ const Vehiculo = require('../Models/Vehicle');
 // ===============================================
 const { verifyToken } = require('../middlewares/authentication');
 
+// TODO: Controlar el nivel de acceso a cada servicio, con el token no es suficiente
 
 // ===============================================
 // Create vehicle
@@ -18,6 +20,8 @@ app.post('/vehi', verifyToken, (req, res) => {
     let body = req.body;
     if(body.movil && body.placa && body.tipo && body.marca && body.modelo && body.anio){
         let vehi = new Vehiculo(body);
+        // TODO: Verificar el formato del código y si es necesario
+        vehi.codTipoDeVehiculo = `${body.placa}-${body.movil}-${body.tipo}`;
         
         vehi.save((err, vehiDB) => {
             if (err) {
@@ -32,7 +36,7 @@ app.post('/vehi', verifyToken, (req, res) => {
     }else{
         res.status(400).json({
             err: {
-                message: "El número de móvil, tipo de vehículo, marca, modelo y año son necesarios"
+                message: "El número de móvil, placa, tipo de vehículo, marca, modelo y año son necesarios"
             }
         });
     }
@@ -61,8 +65,8 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
 // Default 15 users from 0
 // ===============================================
 app.get('/vehi', verifyToken, (req, res) => {
-    let from = Number(req.params.from) || 0;
-    let limit = Number(req.params.to) || 15;
+    let from = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 15;
     // TODO: define search params and info needed
     Vehiculo.find({}, 'movil placa tipo servicios')
         .skip(from)

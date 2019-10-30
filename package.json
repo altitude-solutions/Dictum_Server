@@ -1,7 +1,7 @@
 {
   "name": "servicios",
   "version": "1.0.0",
-  "description": "ubirat http server",
+  "description": "LPL http server",
   "main": "server/main.js",
   "scripts": {
     "test": "nodemon server/main.js",
@@ -11,7 +11,10 @@
     "type": "git",
     "url": "git+https://github.com/Altitude-Solutions/dictum-http.git"
   },
-  "author": "",
+  "author": {
+    "name": "Altitude Solutions",
+    "email": "javier.contreras@altitudesolutions.org"
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Altitude-Solutions/dictum-http/issues"

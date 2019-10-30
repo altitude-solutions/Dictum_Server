@@ -24,11 +24,13 @@ let tipoDeServicio = {
 let Vehiculo = new mongoose.Schema({
     movil: {
         type: String,
-        required: [true, 'El número de móvil es necesario']
+        required: [true, 'El número de móvil es necesario'],
+        unique: true
     },
     placa: {
         type: String,
-        required: [true, 'La placa del vehículo es necesaria']
+        required: [true, 'La placa del vehículo es necesaria'],
+        unique: true
     },
     tipo: {
         type: String,
@@ -42,11 +44,11 @@ let Vehiculo = new mongoose.Schema({
     },
     codTipoDeVehiculo: {
         type: String,
-        required: false
+        required: [true, 'El código del tipo de vehículo es necesario']
     },
     descripcion: {
         type: String,
-        required: false
+        required: true
     },
     cargaToneladas: {
         type: Number,
@@ -56,7 +58,7 @@ let Vehiculo = new mongoose.Schema({
         type: Number,
         required: false
     },
-    litros: {
+    cargaLitros: {
         type: Number,
         required: false
     },
@@ -90,11 +92,11 @@ let Vehiculo = new mongoose.Schema({
     },
     combustible: {
         type: String,
-        required: false
+        required: [true, 'El combustible es necesario']
     },
     ruedas: {
         type: Number,
-        required: false
+        required: [true, 'El número de ruedas es necesario']
     },
     motor: {
         type: String,
@@ -106,7 +108,7 @@ let Vehiculo = new mongoose.Schema({
     },
     chasis: {
         type: String,
-        required: false
+        required: [true, 'El chasis es necesario']
     },
     serie: {
         type: String,
@@ -119,7 +121,7 @@ let Vehiculo = new mongoose.Schema({
 });
 
 // ===============================================
-// Validar los permisos del usuario
+// Validar el tipo de vehiculo y el servicio que presta
 // ===============================================
 Vehiculo.plugin(uniqueValidator, {
     message: '{PATH} debe ser único'
@@ -129,4 +131,4 @@ Vehiculo.plugin(uniqueValidator, {
 // ===============================================
 // Export Usuario model
 // ===============================================
-module.exports = mongoose.model('Usuario', Usuario);
+module.exports = mongoose.model('Vehiculo', Vehiculo);

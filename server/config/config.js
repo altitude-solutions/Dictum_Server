@@ -15,7 +15,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 const mongoose = require('mongoose');
 process.env.URLDB = process.env.NODE_ENV === 'dev' ? 'mongodb://127.0.0.1:27017/LPL' : process.env.MONGOURI;
 
-mongoose.connect(process.env.URLDB, { useFindAndModify: false, useNewUrlParser: true, useCreateIndex: true },
+mongoose.connect(process.env.URLDB, { useFindAndModify: false, useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
     (err) => {
         if (err) {
             console.log('Error de conexión con la base de datos');
@@ -35,3 +35,21 @@ process.env.CADUCIDAD_TOKEN = process.env.CADUCIDAD_TOKEN || '24h';
 // Token seed
 // ===============================================
 process.env.SEED = process.env.SEED || 'development-seed';
+
+
+
+// ===============================================
+// Close conecionts
+// ===============================================
+let disconnectDB = () => {
+    mongoose.disconnect( err => {
+        if(err){
+            console.log('Could not disconnect from mongodb');
+        } else{
+            console.log('Disconnected');
+        }
+    });
+}
+module.exports = {
+    disconnectDB
+};

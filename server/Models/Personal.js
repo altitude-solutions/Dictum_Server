@@ -5,18 +5,20 @@ const uniqueValidator = require('mongoose-unique-validator');
 // Permisos válidos
 // ===============================================
 let validEmployeeRoles = {
-    values: ['es_leer', 'es_escribir', 'es_borrar', 'es_modificar', 'or_leer', 'or_escribir', 'or_borrar', 'or_modificar', 'u_leer', 'u_escribir', 'u_borrar', 'u_modificar'],
+    values: ['es_leer', 'es_escribir', 'es_borrar', 'es_modificar',
+             'or_leer', 'or_escribir', 'or_borrar', 'or_modificar',
+             'u_leer', 'u_escribir', 'u_borrar', 'u_modificar'],
     message: '{VALUE} no es un permiso válido'
 }
 
 // ===============================================
 // Modelo de empleado
 // ===============================================
-let Usuario = new mongoose.Schema({
-    nombreUsuario: {
+let Personal = new mongoose.Schema({
+    idPersonal: {
         type: String,
-        required: [true, 'El nombre del usuario es necesario'],
-        unique: true  
+        required: [true, 'El ID de la persona es necesario'],
+        unique: true
     },
     permisos: {
         type: [String],

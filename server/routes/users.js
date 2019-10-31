@@ -36,6 +36,7 @@ app.post('/users', (req, res) => {
                         // Create user
                         // ===============================================
                         let body = req.body;
+                        console.log('Create user', body);
                         if (body.nombreUsuario && body.contra && body.ci) {
                             let user = new Usuario({
                                 nombreUsuario: body.nombreUsuario,
@@ -74,6 +75,7 @@ app.post('/users', (req, res) => {
             // Create root user when there is no other user
             // ===============================================
             let body = req.body;
+            console.log('Create root user', body);
             if (body.nombreUsuario && body.contra && body.ci) {
                 let user = new Usuario({
                     nombreUsuario: body.nombreUsuario,

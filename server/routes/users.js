@@ -90,6 +90,7 @@ app.post('/users', (req, res) => {
                 });
                 user.save((err, userDB) => {
                     if (err) {
+                        console.log(err);
                         return res.status(400).json({
                             err
                         });

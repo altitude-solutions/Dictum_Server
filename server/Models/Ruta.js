@@ -22,7 +22,7 @@ let tipoDeServicio = {
 // ===============================================
 let listaZonas = {
     values: ['', '', '', ''],
-    	message: ''
+    	message: '{VALUE} no es una zona válida'
 };
 
 

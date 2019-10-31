@@ -5,9 +5,12 @@ const uniqueValidator = require('mongoose-unique-validator');
 // Permisos válidos
 // ===============================================
 let validEmployeeRoles = {
-    values: ['es_leer', 'es_escribir', 'es_borrar', 'es_modificar',
-             'or_leer', 'or_escribir', 'or_borrar', 'or_modificar',
-             'u_leer', 'u_escribir', 'u_borrar', 'u_modificar'],
+    values: ['es_leer', 'es_escribir', 'es_borrar', 'es_modificar',             // estación de servicio
+             'or_leer', 'or_escribir', 'or_borrar', 'or_modificar',             // operador de radio
+             'u_leer', 'u_escribir', 'u_borrar', 'u_modificar',                 // usuarios
+             'ru_leer', 'ru_escribir', 'ru_borrar', 'ru_modificar',             // rutas
+             'p_leer', 'p_escribir', 'p_borrar', 'p_modificar',                 // personal
+             've_leer', 've_escribir', 've_borrar', 've_modificar'],            // vehículos
     message: '{VALUE} no es un permiso válido'
 }
 

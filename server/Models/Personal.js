@@ -2,13 +2,19 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
 // ===============================================
-// Permisos válidos
+// Turnos válidos
 // ===============================================
-let validEmployeeRoles = {
-    values: ['es_leer', 'es_escribir', 'es_borrar', 'es_modificar',
-             'or_leer', 'or_escribir', 'or_borrar', 'or_modificar',
-             'u_leer', 'u_escribir', 'u_borrar', 'u_modificar'],
-    message: '{VALUE} no es un permiso válido'
+let turnosValidos = {
+    values: ['nocturno', 'diurno', 'vespertino'],
+    message: '{VALUE} no es un turno válido'
+}
+
+// ===============================================
+// Dias laborales
+// ===============================================
+let diasLaborales = {
+    values: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
+    message: '{VALUE} no es un día válido'
 }
 
 // ===============================================
@@ -20,43 +26,54 @@ let Personal = new mongoose.Schema({
         required: [true, 'El ID de la persona es necesario'],
         unique: true
     },
-    permisos: {
+    nombre: {
         type: [String],
-        enum: validEmployeeRoles
+        required: [true, 'El nombre de la persona es necesario']
     },
-    contra: {
+    carnet: {
         type: String,
-        required: [true, 'La contraseña es necesaria']
+        required: [true, 'El carnet de la persona es necesario']
     },
-    recuperacion: {
+    cargo: {
         type: String,
-        required: [true, 'La clave de recuperación es necesaria']
+        required: [true, 'El cargo de la persona es necesaria']
     },
-    empresa: {
+    proyecto: {
         type: String,
         required: false
+    },
+    turno: {
+        type: String,
+        required: false,
+        enum: turnosValidos
+    },
+    zonaYRuta: {
+        type: [Object],
+        required: false
+    },
+    subZona: {
+        type: String,
+        required: false
+    },
+    supervisor: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false
+    },
+    diasLaborales: {
+        type: [String],
+        enum: diasLaborales,
+        required: [true, 'Los dias laborales son necesarios']
     }
 });
 
 // ===============================================
-// Validar los permisos del usuario
+// Validar los permisos del personal
 // ===============================================
-Usuario.plugin(uniqueValidator, {
+Personal.plugin(uniqueValidator, {
     message: '{PATH} debe ser único'
 });
 
 // ===============================================
-// Remove password and recovery code
+// Export Personal model
 // ===============================================
-Usuario.methods.toJSON = function() {
-    let Employee = this;
-    let EmployeeObj = Employee.toObject();
-    delete EmployeeObj.contra;
-    delete EmployeeObj.recuperacion
-    return EmployeeObj;
-};
-
-// ===============================================
-// Export Usuario model
-// ===============================================
-module.exports = mongoose.model('Usuario', Usuario);
+module.exports = mongoose.model('Personal', Personal);

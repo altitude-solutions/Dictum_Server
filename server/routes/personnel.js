@@ -4,7 +4,7 @@ const _ = require('underscore');
 // ===============================================
 // Employee model
 // ===============================================
-const Vehiculo = require('../Models/Vehicle');
+const Personal = require('../Models/Personal');
 
 // ===============================================
 // Middlewares
@@ -12,92 +12,89 @@ const Vehiculo = require('../Models/Vehicle');
 const { verifyToken } = require('../middlewares/authentication');
 
 // ===============================================
-// Create vehicle
+// Create user
 // ===============================================
-app.post('/vehi', verifyToken, (req, res) => {
+app.post('/personnel', (req, res) => {
     let body = req.body;
     let user = decoded.user;
-    if(user.permisos.includes('ve_escribir')){
-        if(body.movil && body.placa && body.tipo && body.marca && body.modelo && body.anio){
-            let vehi = new Vehiculo(body);
-            // TODO: Verificar el formato del código y si es necesario
-            vehi.codTipoDeVehiculo = `${body.placa}-${body.movil}-${body.tipo}`;
-            
-            vehi.save((err, vehiDB) => {
+    if(user.permisos.includes('p_escribir')){
+        if(body.idPersonal && body.nombre && body.carnet && body.cargo && body.diasLaborales){
+            let personnel = new Personal(body);
+            personnel.save((err, personnelDB) => {
                 if (err) {
-                    return res.status(400).json({
+                    return res.status(500).json({
                         err
                     });
                 }
                 res.json({
-                    vehicle: vehiDB
+                    persona: personnelDB
                 });
             });
         }else{
             res.status(400).json({
                 err: {
-                    message: "El número de móvil, placa, tipo de vehículo, marca, modelo y año son necesarios"
+                    message: "El ID, nombre, carnet, cargo y días laborales son necesarios"
                 }
             });
         }
     }else{
         res.status(403).json({
             err: {
-                message: 'No está autorizado para crear vehículos'
+                message: 'No está autorizado para crear personas'
             }
         });
     }
 });
 
 // ===============================================
-// Read vehi by id
+// Read user by id
 // ===============================================
-app.get('/vehi/:id', verifyToken, (req, res) => {
+app.get('/personnel/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = decoded.user;
-    if(user.permisos.includes('ve_leer')){
-        Vehiculo.findById(id, (err, dbVehi)=>{
-            if(err) {
+    if(user.permisos.includes('p_leer')){
+        Personal.findById(id, (err, personnelDB) => {
+            if (err) {
                 return res.status(500).json({
                     err
                 });
             }
             res.json({
-                vehicle: dbVehi
+                persona: personnelDB
             });
         });
     }else{
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar vehículos'
+                message: 'No está autorizado para observar personas'
             }
         });
     }
 });
 
 // ===============================================
-// Get vehicles
+// Get users
 // Optional pagination
 // Default 15 users from 0
 // ===============================================
-app.get('/vehi', verifyToken, (req, res) => {
+app.get('/personnel', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
     let user = decoded.user;
-    if(user.permisos.includes('ve_leer')){
-        // TODO: define search params and info needed
-        Vehiculo.find({}, 'movil placa tipo servicios')
+    if(user.permisos.includes('p_leer')){
+        // TODO: define search params
+        Personal.find({}, 'idPersonal nombre carnet diasLaborales')
             .skip(from)
             .limit(limit)
-            .exec( (err, vehicles) => {
-                if(err){
+            .exec((err, personas) => {
+                if (err) {
                     return res.status(400).json({
                         err
                     });
                 }
-                Vehiculo.countDocuments({}, (err, c) => {
+                Personal.countDocuments({}, (err, c) => {
                     res.json({
-                        vehicles,
+                        personas,
                         count: c
                     });
                 });
@@ -105,37 +102,34 @@ app.get('/vehi', verifyToken, (req, res) => {
     }else{
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar vehículos'
+                message: 'No está autorizado para observar personas'
             }
         });
     }
 });
 
 // ===============================================
-// Update vehicle
+// Update user
 // ===============================================
-app.put('/vehi/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['movil', 'placa', 'tipo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
-                                 'cargaToneladas', 'cargaMetrocCubicos', 'litros', 'marca', 'modelo',
-                                 'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
-                                 'motor', 'turbo', 'chasis', 'serie', 'color']);
+app.put('/personnel/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['ruta', 'servicio', 'tipoVehiculos', 'referencia', 'vehiculo', 'zonaYTurno', 'numeroRuta', 'frecuencia', 'POA']);
     let id = req.params.id;
     let user = decoded.user;
-    if(user.permisos.includes('ve_leer')){
-        Vehiculo.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, dbVehi) => {
-            if(err){
-                return res.status(400).json({
+    if(user.permisos.includes('p_modificar')){
+        Personal.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, dbPersonnel) => {
+            if (err) {
+                return res.status(500).json({
                     err
                 });
             }
             res.json({
-                vehicle: dbVehi
+                persona: dbPersonnel
             });
         });
     }else{
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar vehículos'
+                message: 'No está autorizado para modificar personas'
             }
         });
     }
@@ -144,35 +138,36 @@ app.put('/vehi/:id', verifyToken, (req, res) => {
 // ===============================================
 // Delete user
 // ===============================================
-app.delete('/vehi/:id', verifyToken, (req, res) => {
+app.delete('/personnel/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = decoded.user;
-    if(user.permisos.includes('ve_borrar')){
-        Vehiculo.findByIdAndRemove(id, (err, deletedVehi)=> {
-            if(err){
+    if(user.permisos.includes('p_borrar')){
+        Personal.findByIdAndRemove(id, (err, deletedPersonnel) => {
+            if (err) {
                 return res.status(500).json({
                     err
                 });
             }
-            if(!deletedVehi){
+            if (!deletedPersonnel) {
                 return res.status(400).json({
                     err: {
-                        message: 'Vehículo no encontrado'
+                        message: 'Persona no encontrada'
                     }
                 });
             }
             res.json({
-                message: `El móvil con código ${deletedVehi.movil} ha sido eliminado`
+                message: `La persona con CI ${deletedPersonnel.carnet} ha sido eliminada`
             });
         });
     }else{
         res.status(403).json({
             err: {
-                message: 'No está autorizado para borrar vehículos'
+                message: 'No está autorizado para borrar personas'
             }
         });
     }
 });
+
 
 // ===============================================
 // Export routes

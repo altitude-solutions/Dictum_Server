@@ -15,8 +15,6 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 const mongoose = require('mongoose');
 process.env.URLDB = process.env.NODE_ENV === 'dev' ? 'mongodb://127.0.0.1:27017/LPL' : process.env.MONGOURI;
 
-console.log(process.env.URLDB);
-
 mongoose.connect(process.env.URLDB, { useFindAndModify: false, useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
     (err) => {
         if (err) {
@@ -37,8 +35,6 @@ process.env.CADUCIDAD_TOKEN = process.env.CADUCIDAD_TOKEN || '24h';
 // Token seed
 // ===============================================
 process.env.SEED = process.env.SEED || 'development-seed';
-
-
 
 // ===============================================
 // Close conecionts

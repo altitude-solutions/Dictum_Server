@@ -34,7 +34,7 @@ app.post('/login', (req, res) => {
         if (!dbUser) {
             return res.status(404).json({
                 err: {
-                    message: '(Usuario) o contraseña incorrectos'
+                    message: 'Usuario o contraseña incorrectos'
                 }
             });
         }

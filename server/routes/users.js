@@ -31,7 +31,7 @@ app.post('/users', (req, res) => {
                     });
                 } else {
                     let user = decoded.user;
-                    if(user.permisos.includes('u_escribir')){
+                    if (user.permisos.includes('u_escribir')) {
                         // ===============================================
                         // Create user
                         // ===============================================
@@ -62,14 +62,14 @@ app.post('/users', (req, res) => {
                                 }
                             });
                         }
-                    }else{
+                    } else {
                         return res.status(403).json({
                             message: 'No está autorizado para crear usuarios'
                         });
-                    }   
+                    }
                 }
             });
-        }else{
+        } else {
             // ===============================================
             // Create root user when there is no other user
             // ===============================================
@@ -80,11 +80,12 @@ app.post('/users', (req, res) => {
                     contra: bcrypt.hashSync(body.contra, 10),
                     recuperacion: body.ci,
                     permisos: ['es_leer', 'es_escribir', 'es_borrar', 'es_modificar',
-                               'or_leer', 'or_escribir', 'or_borrar', 'or_modificar',
-                               'u_leer', 'u_escribir', 'u_borrar', 'u_modificar', 
-                               'ru_leer', 'ru_escribir', 'ru_borrar', 'ru_modificar',
-                               'p_leer', 'p_escribir', 'p_borrar', 'p_modificar',
-                               've_leer', 've_escribir', 've_borrar', 've_modificar']
+                        'or_leer', 'or_escribir', 'or_borrar', 'or_modificar',
+                        'u_leer', 'u_escribir', 'u_borrar', 'u_modificar',
+                        'ru_leer', 'ru_escribir', 'ru_borrar', 'ru_modificar',
+                        'p_leer', 'p_escribir', 'p_borrar', 'p_modificar',
+                        've_leer', 've_escribir', 've_borrar', 've_modificar'
+                    ]
                 });
                 user.save((err, userDB) => {
                     if (err) {
@@ -112,8 +113,8 @@ app.post('/users', (req, res) => {
 // ===============================================
 app.get('/users/:id', verifyToken, (req, res) => {
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('u_leer')){
+    let user = req.user;
+    if (user.permisos.includes('u_leer')) {
         Usuario.findById(id, (err, dbUser) => {
             if (err) {
                 return res.status(500).json({
@@ -124,7 +125,7 @@ app.get('/users/:id', verifyToken, (req, res) => {
                 user: dbUser
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar usuarios'
@@ -141,8 +142,8 @@ app.get('/users/:id', verifyToken, (req, res) => {
 app.get('/users', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
-    let user = decoded.user;
-    if(user.permisos.includes('u_leer')){
+    let user = req.user;
+    if (user.permisos.includes('u_leer')) {
         // TODO: define search params
         Usuario.find({}, 'nombreUsuario permisos empresa')
             .skip(from)
@@ -160,7 +161,7 @@ app.get('/users', verifyToken, (req, res) => {
                     });
                 });
             });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar usuarios'
@@ -175,8 +176,8 @@ app.get('/users', verifyToken, (req, res) => {
 app.put('/users/:id', verifyToken, (req, res) => {
     let body = _.pick(req.body, ['permisos', 'contra', 'empresa']);
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('u_modificar')){
+    let user = req.user;
+    if (user.permisos.includes('u_modificar')) {
         if (body.contra) {
             body.contra = bcrypt.hashSync(body.contra, 10);
         }
@@ -190,7 +191,7 @@ app.put('/users/:id', verifyToken, (req, res) => {
                 user: dbUsuario
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para modificar usuarios'
@@ -204,8 +205,8 @@ app.put('/users/:id', verifyToken, (req, res) => {
 // ===============================================
 app.delete('/users/:id', verifyToken, (req, res) => {
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('u_borrar')){
+    let user = req.user;
+    if (user.permisos.includes('u_borrar')) {
         Usuario.findByIdAndRemove(id, (err, deletedUser) => {
             if (err) {
                 return res.status(500).json({
@@ -223,7 +224,7 @@ app.delete('/users/:id', verifyToken, (req, res) => {
                 message: `La cuenta de ${deletedUser.nombreUsuario} ha sido eliminada`
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para borrar usuarios'

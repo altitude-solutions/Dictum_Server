@@ -16,13 +16,13 @@ const { verifyToken } = require('../middlewares/authentication');
 // ===============================================
 app.post('/vehi', verifyToken, (req, res) => {
     let body = req.body;
-    let user = decoded.user;
-    if(user.permisos.includes('ve_escribir')){
-        if(body.movil && body.placa && body.tipo && body.marca && body.modelo && body.anio){
+    let user = req.user;
+    if (user.permisos.includes('ve_escribir')) {
+        if (body.movil && body.placa && body.tipo && body.marca && body.modelo && body.anio) {
             let vehi = new Vehiculo(body);
             // TODO: Verificar el formato del código y si es necesario
             vehi.codTipoDeVehiculo = `${body.placa}-${body.movil}-${body.tipo}`;
-            
+
             vehi.save((err, vehiDB) => {
                 if (err) {
                     return res.status(400).json({
@@ -33,14 +33,14 @@ app.post('/vehi', verifyToken, (req, res) => {
                     vehicle: vehiDB
                 });
             });
-        }else{
+        } else {
             res.status(400).json({
                 err: {
                     message: "El número de móvil, placa, tipo de vehículo, marca, modelo y año son necesarios"
                 }
             });
         }
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para crear vehículos'
@@ -54,10 +54,10 @@ app.post('/vehi', verifyToken, (req, res) => {
 // ===============================================
 app.get('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('ve_leer')){
-        Vehiculo.findById(id, (err, dbVehi)=>{
-            if(err) {
+    let user = req.user;
+    if (user.permisos.includes('ve_leer')) {
+        Vehiculo.findById(id, (err, dbVehi) => {
+            if (err) {
                 return res.status(500).json({
                     err
                 });
@@ -66,7 +66,7 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
                 vehicle: dbVehi
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar vehículos'
@@ -83,14 +83,14 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
 app.get('/vehi', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
-    let user = decoded.user;
-    if(user.permisos.includes('ve_leer')){
+    let user = req.user;
+    if (user.permisos.includes('ve_leer')) {
         // TODO: define search params and info needed
         Vehiculo.find({}, 'movil placa tipo servicios')
             .skip(from)
             .limit(limit)
-            .exec( (err, vehicles) => {
-                if(err){
+            .exec((err, vehicles) => {
+                if (err) {
                     return res.status(400).json({
                         err
                     });
@@ -102,7 +102,7 @@ app.get('/vehi', verifyToken, (req, res) => {
                     });
                 });
             });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar vehículos'
@@ -116,14 +116,15 @@ app.get('/vehi', verifyToken, (req, res) => {
 // ===============================================
 app.put('/vehi/:id', verifyToken, (req, res) => {
     let body = _.pick(req.body, ['movil', 'placa', 'tipo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
-                                 'cargaToneladas', 'cargaMetrocCubicos', 'litros', 'marca', 'modelo',
-                                 'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
-                                 'motor', 'turbo', 'chasis', 'serie', 'color']);
+        'cargaToneladas', 'cargaMetrocCubicos', 'litros', 'marca', 'modelo',
+        'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
+        'motor', 'turbo', 'chasis', 'serie', 'color'
+    ]);
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('ve_leer')){
-        Vehiculo.findByIdAndUpdate(id, body, {new: true, runValidators: true}, (err, dbVehi) => {
-            if(err){
+    let user = req.user;
+    if (user.permisos.includes('ve_leer')) {
+        Vehiculo.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, dbVehi) => {
+            if (err) {
                 return res.status(400).json({
                     err
                 });
@@ -132,7 +133,7 @@ app.put('/vehi/:id', verifyToken, (req, res) => {
                 vehicle: dbVehi
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar vehículos'
@@ -146,15 +147,15 @@ app.put('/vehi/:id', verifyToken, (req, res) => {
 // ===============================================
 app.delete('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('ve_borrar')){
-        Vehiculo.findByIdAndRemove(id, (err, deletedVehi)=> {
-            if(err){
+    let user = req.user;
+    if (user.permisos.includes('ve_borrar')) {
+        Vehiculo.findByIdAndRemove(id, (err, deletedVehi) => {
+            if (err) {
                 return res.status(500).json({
                     err
                 });
             }
-            if(!deletedVehi){
+            if (!deletedVehi) {
                 return res.status(400).json({
                     err: {
                         message: 'Vehículo no encontrado'
@@ -165,7 +166,7 @@ app.delete('/vehi/:id', verifyToken, (req, res) => {
                 message: `El móvil con código ${deletedVehi.movil} ha sido eliminado`
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para borrar vehículos'

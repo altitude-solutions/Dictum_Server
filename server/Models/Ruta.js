@@ -20,9 +20,10 @@ let tipoDeServicio = {
 // ===============================================
 // Zonas
 // ===============================================
+// TODO: Obtener la lista de zonas
 let listaZonas = {
     values: ['', '', '', ''],
-    	message: '{VALUE} no es una zona válida'
+    message: '{VALUE} no es una zona válida'
 };
 
 

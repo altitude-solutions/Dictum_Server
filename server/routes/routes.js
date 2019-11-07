@@ -14,11 +14,11 @@ const { verifyToken } = require('../middlewares/authentication');
 // ===============================================
 // Create user
 // ===============================================
-app.post('/route', (req, res) => {
+app.post('/route', verifyToken, (req, res) => {
     let body = req.body;
-    let user = decoded.user;
-    if(user.permisos.includes('ru_escribir')){
-        if(body.ruta && body.servicio && body.tipoVehiculos){
+    let user = req.user;
+    if (user.permisos.includes('ru_escribir')) {
+        if (body.ruta && body.servicio && body.tipoVehiculos) {
             let route = new Ruta(body);
             route.save((err, routeDB) => {
                 if (err) {
@@ -30,14 +30,14 @@ app.post('/route', (req, res) => {
                     ruta: routeDB
                 });
             });
-        }else{
+        } else {
             res.status(400).json({
                 err: {
                     message: "El código de la ruta, servicio, tipo de vehículo son necesarios"
                 }
             });
         }
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para crear rutas'
@@ -51,8 +51,8 @@ app.post('/route', (req, res) => {
 // ===============================================
 app.get('/route/:id', verifyToken, (req, res) => {
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('ru_leer')){
+    let user = req.user;
+    if (user.permisos.includes('ru_leer')) {
         Ruta.findById(id, (err, dbRoute) => {
             if (err) {
                 return res.status(500).json({
@@ -63,7 +63,7 @@ app.get('/route/:id', verifyToken, (req, res) => {
                 ruta: dbRoute
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar rutas'
@@ -80,8 +80,8 @@ app.get('/route/:id', verifyToken, (req, res) => {
 app.get('/route', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
-    let user = decoded.user;
-    if(user.permisos.includes('ru_leer')){
+    let user = req.user;
+    if (user.permisos.includes('ru_leer')) {
         // TODO: define search params
         Ruta.find({}, 'ruta servicio tipoVehiculos referencia')
             .skip(from)
@@ -99,7 +99,7 @@ app.get('/route', verifyToken, (req, res) => {
                     });
                 });
             });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar rutas'
@@ -114,8 +114,8 @@ app.get('/route', verifyToken, (req, res) => {
 app.put('/route/:id', verifyToken, (req, res) => {
     let body = _.pick(req.body, ['ruta', 'servicio', 'tipoVehiculos', 'referencia', 'vehiculo', 'zonaYTurno', 'numeroRuta', 'frecuencia', 'POA']);
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('ru_modificar')){
+    let user = req.user;
+    if (user.permisos.includes('ru_modificar')) {
         Ruta.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, dbRoute) => {
             if (err) {
                 return res.status(500).json({
@@ -126,7 +126,7 @@ app.put('/route/:id', verifyToken, (req, res) => {
                 ruta: dbRoute
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para modificar rutas'
@@ -140,8 +140,8 @@ app.put('/route/:id', verifyToken, (req, res) => {
 // ===============================================
 app.delete('/route/:id', verifyToken, (req, res) => {
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('ru_borrar')){
+    let user = req.user;
+    if (user.permisos.includes('ru_borrar')) {
         Ruta.findByIdAndRemove(id, (err, deletedRoute) => {
             if (err) {
                 return res.status(500).json({
@@ -159,7 +159,7 @@ app.delete('/route/:id', verifyToken, (req, res) => {
                 message: `La ruta ${deletedRoute.ruta} ha sido eliminada`
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para borrar rutas'

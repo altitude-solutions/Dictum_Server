@@ -13,7 +13,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 // ===============================================
 
 const mongoose = require('mongoose');
-process.env.URLDB = process.env.NODE_ENV === 'dev' ? 'mongodb://127.0.0.1:27017/LPL' : process.env.MONGOURI;
+process.env.URLDB = process.env.NODE_ENV === 'dev' ? 'mongodb+srv://AltitudeSolutions:uevboKDe660C43Nc@pruebas-34upj.mongodb.net/LPL' : process.env.MONGOURI;
 
 mongoose.connect(process.env.URLDB, { useFindAndModify: false, useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
     (err) => {
@@ -40,10 +40,10 @@ process.env.SEED = process.env.SEED || 'development-seed';
 // Close conecionts
 // ===============================================
 let disconnectDB = () => {
-    mongoose.disconnect( err => {
-        if(err){
+    mongoose.disconnect(err => {
+        if (err) {
             console.log('Could not disconnect from mongodb');
-        } else{
+        } else {
             console.log('Disconnected');
         }
     });

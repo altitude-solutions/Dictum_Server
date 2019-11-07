@@ -32,7 +32,7 @@ app.post('/login', (req, res) => {
         }
         // If no user is found send not found error
         if (!dbUser) {
-            return res.status(404).json({
+            return res.status(400).json({
                 err: {
                     message: 'Usuario o contraseña incorrectos'
                 }
@@ -40,7 +40,7 @@ app.post('/login', (req, res) => {
         }
         // If the password does not match send not found error
         if (!bcrypt.compareSync(body.contra, dbUser.contra)) {
-            return res.status(404).json({
+            return res.status(400).json({
                 err: {
                     message: 'Usuario o contraseña incorrectos'
                 }

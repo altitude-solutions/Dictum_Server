@@ -16,9 +16,9 @@ const { verifyToken } = require('../middlewares/authentication');
 // ===============================================
 app.post('/personnel', (req, res) => {
     let body = req.body;
-    let user = decoded.user;
-    if(user.permisos.includes('p_escribir')){
-        if(body.idPersonal && body.nombre && body.carnet && body.cargo && body.diasLaborales){
+    let user = req.user;
+    if (user.permisos.includes('p_escribir')) {
+        if (body.idPersonal && body.nombre && body.carnet && body.cargo && body.diasLaborales) {
             let personnel = new Personal(body);
             personnel.save((err, personnelDB) => {
                 if (err) {
@@ -30,14 +30,14 @@ app.post('/personnel', (req, res) => {
                     persona: personnelDB
                 });
             });
-        }else{
+        } else {
             res.status(400).json({
                 err: {
                     message: "El ID, nombre, carnet, cargo y días laborales son necesarios"
                 }
             });
         }
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para crear personas'
@@ -51,8 +51,8 @@ app.post('/personnel', (req, res) => {
 // ===============================================
 app.get('/personnel/:id', verifyToken, (req, res) => {
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('p_leer')){
+    let user = req.user;
+    if (user.permisos.includes('p_leer')) {
         Personal.findById(id, (err, personnelDB) => {
             if (err) {
                 return res.status(500).json({
@@ -63,7 +63,7 @@ app.get('/personnel/:id', verifyToken, (req, res) => {
                 persona: personnelDB
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar personas'
@@ -80,8 +80,8 @@ app.get('/personnel/:id', verifyToken, (req, res) => {
 app.get('/personnel', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
-    let user = decoded.user;
-    if(user.permisos.includes('p_leer')){
+    let user = req.user;
+    if (user.permisos.includes('p_leer')) {
         // TODO: define search params
         Personal.find({}, 'idPersonal nombre carnet diasLaborales')
             .skip(from)
@@ -99,7 +99,7 @@ app.get('/personnel', verifyToken, (req, res) => {
                     });
                 });
             });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para observar personas'
@@ -114,8 +114,8 @@ app.get('/personnel', verifyToken, (req, res) => {
 app.put('/personnel/:id', verifyToken, (req, res) => {
     let body = _.pick(req.body, ['ruta', 'servicio', 'tipoVehiculos', 'referencia', 'vehiculo', 'zonaYTurno', 'numeroRuta', 'frecuencia', 'POA']);
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('p_modificar')){
+    let user = req.user;
+    if (user.permisos.includes('p_modificar')) {
         Personal.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, dbPersonnel) => {
             if (err) {
                 return res.status(500).json({
@@ -126,7 +126,7 @@ app.put('/personnel/:id', verifyToken, (req, res) => {
                 persona: dbPersonnel
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para modificar personas'
@@ -140,8 +140,8 @@ app.put('/personnel/:id', verifyToken, (req, res) => {
 // ===============================================
 app.delete('/personnel/:id', verifyToken, (req, res) => {
     let id = req.params.id;
-    let user = decoded.user;
-    if(user.permisos.includes('p_borrar')){
+    let user = req.user;
+    if (user.permisos.includes('p_borrar')) {
         Personal.findByIdAndRemove(id, (err, deletedPersonnel) => {
             if (err) {
                 return res.status(500).json({
@@ -159,7 +159,7 @@ app.delete('/personnel/:id', verifyToken, (req, res) => {
                 message: `La persona con CI ${deletedPersonnel.carnet} ha sido eliminada`
             });
         });
-    }else{
+    } else {
         res.status(403).json({
             err: {
                 message: 'No está autorizado para borrar personas'

@@ -1,8 +1,15 @@
+/**
+ *
+ * @author:   Javier Contreras
+ * @email:    javier.contreras@altitudesolutions.org
+ *
+ **/
+
 // ===============================================
 // Server main file
 // ===============================================
 // Config
-let {disconnectDB} = require('./config/config');
+let { disconnectDB } = require('./config/config');
 // Express server
 const express = require('express');
 // Http server

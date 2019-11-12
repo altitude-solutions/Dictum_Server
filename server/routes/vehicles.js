@@ -1,15 +1,21 @@
+/**
+ *
+ * @author:   Javier Contreras
+ * @email:    javier.contreras@altitudesolutions.org
+ *
+ **/
+
 const express = require('express');
 const app = express();
 const _ = require('underscore');
-// ===============================================
-// Employee model
-// ===============================================
-const Vehiculo = require('../Models/Vehicle');
 
 // ===============================================
 // Middlewares
 // ===============================================
 const { verifyToken } = require('../middlewares/authentication');
+const { sqlBuilder } = require('../classes/SQLBuilder');
+
+let db = process.dbConnection;
 
 // ===============================================
 // Create vehicle
@@ -18,21 +24,25 @@ app.post('/vehi', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('ve_escribir')) {
-        if (body.movil && body.placa && body.tipo && body.marca && body.modelo && body.anio) {
-            let vehi = new Vehiculo(body);
+        if (body.movil && body.placa && body.tipoDeVehiculo && body.marca && body.modelo && body.anio) {
             // TODO: Verificar el formato del código y si es necesario
-            vehi.codTipoDeVehiculo = `${body.placa}-${body.movil}-${body.tipo}`;
-
-            vehi.save((err, vehiDB) => {
+            body.codTipoDeVehiculo = `${body.placa}-${body.movil}`;
+            let bodyContent = {
+                keys: Object.keys(body),
+                values: Object.values(body),
+            };
+            let query = sqlBuilder('insert', 'Vehiculos', bodyContent);
+            db.query(query, (err, results, fields) => {
                 if (err) {
-                    return res.status(400).json({
+                    return res.status(500).json({
                         err
                     });
                 }
                 res.json({
-                    vehicle: vehiDB
+                    results
                 });
             });
+
         } else {
             res.status(400).json({
                 err: {
@@ -56,15 +66,21 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        Vehiculo.findById(id, (err, dbVehi) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
-            }
-            res.json({
-                vehicle: dbVehi
-            });
+        let arg = {
+            id
+        };
+        if (req.query) {
+            arg.params = req.query;
+        }
+        console.log(params);
+        let bodyContent = {
+            keys: Object.keys(arg),
+            values: Object.values(arg)
+        };
+        let query = sqlBuilder('select', 'Vehiculos', bodyContent);
+        console.log(query);
+        res.json({
+            ok: true
         });
     } else {
         res.status(403).json({

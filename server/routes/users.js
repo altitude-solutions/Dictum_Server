@@ -1,25 +1,70 @@
+/**
+ *
+ * @title:             Users
+ *
+ * @author:            Javier Contreras
+ * @email:             javier.contreras@altitudesolutions.org
+ *
+ * @description:       This code will handle http requests from "Sistemas LPL" to create, update, get and delete users
+ *
+ **/
+
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const jwt = require('jsonwebtoken');
-// ===============================================
-// Employee model
-// ===============================================
-const Usuario = require('../Models/User');
 
 // ===============================================
 // Middlewares
 // ===============================================
 const { verifyToken } = require('../middlewares/authentication');
+const { construirPermisos, empaquetarPermisos } = require('../classes/Permisos');
+
+let saveUserToDB = (req, res, noUsers = false) => {
+    let body = req.body;
+    if (body.nombreUsuario && body.contra && body.ci) {
+        body.contra = bcrypt.hashSync(body.contra, 10);
+        if (noUsers) {
+            body.permisos = '1111 1111 1111 1111 1111 1111';
+        } else {
+            if (body.permisos) {
+                body.permisos = empaquetarPermisos(body.permisos);
+            }
+        }
+        let schema = `nombreUsuario, permisos, contra, recuperacion, nombreReal`;
+        let values = `"${body.nombreUsuario}", "${body.permisos}", "${body.contra}", "${body.ci}", "${body.nombreReal}"`;
+        if (body.empresa) {
+            schema += ', empresa',
+                values += `, "${body.empresa}"`
+        }
+        process.dbConnection.query(`INSERT INTO Usuarios (${schema}) values (${values})`, (err, results, fields) => {
+            if (err) {
+                return res.status(500).json({
+                    err
+                });
+            }
+            res.json({
+                results,
+                fields
+            });
+        });
+    }
+};
+
 
 // ===============================================
 // Create user
 // ===============================================
 app.post('/users', (req, res) => {
-    Usuario.countDocuments({}, (err, c) => {
-        // Check if there is at least one user
-        if (c >= 1) {
+    process.dbConnection.query('SELECT count(*) from Usuarios;', (err, results, fields) => {
+        if (err) {
+            return res.status(500).json({
+                err
+            });
+        }
+        let len = Number(results[0][fields[0].name]);
+        if (len >= 1) {
             let token = req.get('token');
             jwt.verify(token, process.env.SEED, (err, decoded) => {
                 if (err) {
@@ -29,81 +74,20 @@ app.post('/users', (req, res) => {
                             message: 'Token inválido'
                         }
                     });
+                }
+                let user = decoded.user;
+                if (user.permisos.includes('u_escribir')) {
+                    saveUserToDB(req, res);
                 } else {
-                    let user = decoded.user;
-                    if (user.permisos.includes('u_escribir')) {
-                        // ===============================================
-                        // Create user
-                        // ===============================================
-                        let body = req.body;
-                        if (body.nombreUsuario && body.contra && body.ci) {
-                            let user = new Usuario({
-                                nombreUsuario: body.nombreUsuario,
-                                contra: bcrypt.hashSync(body.contra, 10),
-                                recuperacion: body.ci
-                            });
-                            if (body.permisos) {
-                                user.permisos = body.permisos;
-                            }
-                            user.save((err, userDB) => {
-                                if (err) {
-                                    return res.status(400).json({
-                                        err
-                                    });
-                                }
-                                res.json({
-                                    user: userDB
-                                });
-                            });
-                        } else {
-                            res.status(400).json({
-                                err: {
-                                    message: "El nombre del usuario y contraseña son necesarios"
-                                }
-                            });
+                    return res.status(403).json({
+                        err: {
+                            message: 'No autorizado'
                         }
-                    } else {
-                        return res.status(403).json({
-                            message: 'No está autorizado para crear usuarios'
-                        });
-                    }
+                    });
                 }
             });
         } else {
-            // ===============================================
-            // Create root user when there is no other user
-            // ===============================================
-            let body = req.body;
-            if (body.nombreUsuario && body.contra && body.ci) {
-                let user = new Usuario({
-                    nombreUsuario: body.nombreUsuario,
-                    contra: bcrypt.hashSync(body.contra, 10),
-                    recuperacion: body.ci,
-                    permisos: ['es_leer', 'es_escribir', 'es_borrar', 'es_modificar',
-                        'or_leer', 'or_escribir', 'or_borrar', 'or_modificar',
-                        'u_leer', 'u_escribir', 'u_borrar', 'u_modificar',
-                        'ru_leer', 'ru_escribir', 'ru_borrar', 'ru_modificar',
-                        'p_leer', 'p_escribir', 'p_borrar', 'p_modificar',
-                        've_leer', 've_escribir', 've_borrar', 've_modificar'
-                    ]
-                });
-                user.save((err, userDB) => {
-                    if (err) {
-                        return res.status(400).json({
-                            err
-                        });
-                    }
-                    res.json({
-                        user: userDB
-                    });
-                });
-            } else {
-                res.status(400).json({
-                    err: {
-                        message: "El nombre del usuario y contraseña son necesarios"
-                    }
-                });
-            }
+            saveUserToDB(req, res, true);
         }
     });
 });
@@ -115,14 +99,25 @@ app.get('/users/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('u_leer')) {
-        Usuario.findById(id, (err, dbUser) => {
+
+        process.dbConnection.query(`select * from Usuarios where nombreUsuario="${id}"`, (err, results, fields) => {
             if (err) {
                 return res.status(500).json({
                     err
                 });
             }
-            res.json({
-                user: dbUser
+            if (results[0]) {
+                let dbUser = results[0];
+                dbUser.permisos = construirPermisos(dbUser.permisos);
+                delete dbUser.contra;
+                return res.json({
+                    user: dbUser
+                });
+            }
+            res.status(404).json({
+                err: {
+                    message: `${id} no encontrado`
+                }
             });
         });
     } else {
@@ -145,22 +140,22 @@ app.get('/users', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('u_leer')) {
         // TODO: define search params
-        Usuario.find({}, 'nombreUsuario permisos empresa')
-            .skip(from)
-            .limit(limit)
-            .exec((err, users) => {
-                if (err) {
-                    return res.status(400).json({
-                        err
-                    });
-                }
-                Usuario.countDocuments({}, (err, c) => {
-                    res.json({
-                        users,
-                        count: c
-                    });
+        process.dbConnection.query(`select nombreUsuario, permisos, empresa from Usuarios limit ${from}, ${limit}`, (err, results, fields) => {
+            if (err) {
+                return res.status(500).json({
+                    err
+                });
+            }
+            for (let i = 0; i < results.length; i++) {
+                results[i].permisos = construirPermisos(results[i].permisos);
+            }
+            process.dbConnection.query('SELECT count(*) from Usuarios;', (err, counts, fields) => {
+                res.json({
+                    results,
+                    count: Number(counts[0][fields[0].name])
                 });
             });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -174,23 +169,45 @@ app.get('/users', verifyToken, (req, res) => {
 // Update user
 // ===============================================
 app.put('/users/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['permisos', 'contra', 'empresa']);
+    let body = _.pick(req.body, ['permisos', 'contra', 'empresa', 'recuperacion', 'nombreReal']);
     let id = req.params.id;
     let user = req.user;
+
+    let updateString = [];
     if (user.permisos.includes('u_modificar')) {
         if (body.contra) {
             body.contra = bcrypt.hashSync(body.contra, 10);
+            updateString.push(`contra="${body.contra}"`);
         }
-        Usuario.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, dbUsuario) => {
+        if (body.nombreUsuario) {
+            updateString.push(`nombreUsuario="${body.nombreUsuario}"`);
+        }
+        if (body.empresa) {
+            updateString.push(`empresa="${body.empresa}"`);
+        }
+        if (body.recuperacion) {
+            updateString.push(`recuperacion="${body.recuperacion}"`)
+        }
+        if (body.permisos) {
+            body.permisos = empaquetarPermisos(body.permisos);
+            updateString.push(`permisos="${body.permisos}"`);
+        }
+        if (body.nombreReal) {
+            updateString.push(`nombreReal="${body.nombreReal}"`);
+        }
+        updateString = updateString.join(',');
+
+        process.dbConnection.query(`update Usuarios set ${updateString} where nombreusuario="${id}"`, (err, results, fields) => {
             if (err) {
                 return res.status(500).json({
                     err
                 });
             }
             res.json({
-                user: dbUsuario
+                results
             });
         });
+
     } else {
         res.status(403).json({
             err: {
@@ -207,21 +224,14 @@ app.delete('/users/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('u_borrar')) {
-        Usuario.findByIdAndRemove(id, (err, deletedUser) => {
+        process.dbConnection.query(`delete from Usuarios where nombreUsuario="${id}"`, (err, results, fields) => {
             if (err) {
                 return res.status(500).json({
                     err
                 });
             }
-            if (!deletedUser) {
-                return res.status(400).json({
-                    err: {
-                        message: 'Usuario no encontrado'
-                    }
-                });
-            }
             res.json({
-                message: `La cuenta de ${deletedUser.nombreUsuario} ha sido eliminada`
+                results
             });
         });
     } else {

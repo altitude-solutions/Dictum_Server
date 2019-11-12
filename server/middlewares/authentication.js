@@ -1,3 +1,11 @@
+/**
+ *
+ * @author:   Javier Contreras
+ * @email:    javier.contreras@altitudesolutions.org
+ *
+ **/
+
+
 const jwt = require('jsonwebtoken');
 
 // ===============================================

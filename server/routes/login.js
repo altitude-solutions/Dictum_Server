@@ -1,3 +1,10 @@
+/**
+ *
+ * @author:   Javier Contreras
+ * @email:    javier.contreras@altitudesolutions.org
+ *
+ **/
+
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
@@ -5,8 +12,9 @@ const jwt = require('jsonwebtoken');
 // ===============================================
 // User model
 // ===============================================
-const Usuario = require('../Models/User');
+// const Usuario = require('../Models/User');
 
+const { construirPermisos } = require('../classes/Permisos');
 
 // ===============================================
 // Login service
@@ -23,39 +31,40 @@ app.post('/login', (req, res) => {
         })
     }
     // Look for user in the database
-    Usuario.findOne({ nombreUsuario: body.nombreUsuario }, (err, dbUser) => {
-        // If an error occurs send internal server error
+    process.dbConnection.query(`select * from Usuarios where nombreUsuario="${body.nombreUsuario}"`, (err, results, fields) => {
         if (err) {
             return res.status(500).json({
                 err
             });
         }
-        // If no user is found send not found error
-        if (!dbUser) {
-            return res.status(400).json({
+        if (!results[0]) {
+            return res.status(403).json({
                 err: {
                     message: 'Usuario o contraseña incorrectos'
                 }
             });
         }
-        // If the password does not match send not found error
+        let dbUser = results[0];
         if (!bcrypt.compareSync(body.contra, dbUser.contra)) {
-            return res.status(400).json({
+            return res.status(403).json({
                 err: {
                     message: 'Usuario o contraseña incorrectos'
                 }
             });
         }
-        // If no error generate token and send it with a 200 status code
+
+        dbUser.permisos = construirPermisos(dbUser.permisos);
+
         let token = jwt.sign({
             user: dbUser
         }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
 
+        delete dbUser.contra;
+        delete dbUser.recuperacion;
         res.json({
             user: dbUser,
             token
-        });
-
+        })
     });
 });
 

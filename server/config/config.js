@@ -1,3 +1,10 @@
+/**
+ *
+ * @author:   Javier Contreras
+ * @email:    javier.contreras@altitudesolutions.org
+ *
+ **/
+
 // ===============================================
 // Port
 // ===============================================
@@ -37,6 +44,27 @@ process.env.CADUCIDAD_TOKEN = process.env.CADUCIDAD_TOKEN || '24h';
 process.env.SEED = process.env.SEED || 'development-seed';
 
 // ===============================================
+// Maria DB connection
+// ===============================================
+const mysql = require('mysql');
+let dictumConnection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'm4r14db-r00t-89',
+    database: 'DICTUM'
+});
+
+dictumConnection.connect();
+
+// let  = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',
+//     password: 'm4r14db-r00t-89',
+//     database: 'LPL'
+// });
+
+
+// ===============================================
 // Close conecionts
 // ===============================================
 let disconnectDB = () => {
@@ -47,7 +75,13 @@ let disconnectDB = () => {
             console.log('Disconnected');
         }
     });
+
+    dictumConnection.end();
 }
+
+process.dbConnection = dictumConnection;
+
 module.exports = {
     disconnectDB
+    // lplConnectio
 };

@@ -1,3 +1,11 @@
+/**
+ *
+ * @author:   Javier Contreras
+ * @email:    javier.contreras@altitudesolutions.org
+ *
+ **/
+
+
 const express = require('express');
 const app = express();
 const _ = require('underscore');

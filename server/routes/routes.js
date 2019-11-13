@@ -9,15 +9,14 @@
 const express = require('express');
 const app = express();
 const _ = require('underscore');
-// ===============================================
-// Employee model
-// ===============================================
-const Ruta = require('../Models/Ruta');
 
 // ===============================================
 // Middlewares
 // ===============================================
 const { verifyToken } = require('../middlewares/authentication');
+const { sqlBuilder } = require('../classes/SQLBuilder');
+
+let db = process.dbConnection;
 
 // ===============================================
 // Create user
@@ -26,16 +25,20 @@ app.post('/route', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('ru_escribir')) {
-        if (body.ruta && body.servicio && body.tipoVehiculos) {
-            let route = new Ruta(body);
-            route.save((err, routeDB) => {
+        if (body.ruta && body.servicio && body.tipoDeVehiculos) {
+            let bodyContent = {
+                keys: Object.keys(body),
+                values: Object.values(body)
+            };
+            let query = sqlBuilder('insert', 'Rutas', bodyContent);
+            db.query(query, (err, results, fields) => {
                 if (err) {
                     return res.status(500).json({
                         err
                     });
                 }
                 res.json({
-                    ruta: routeDB
+                    results
                 });
             });
         } else {
@@ -61,14 +64,32 @@ app.get('/route/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ru_leer')) {
-        Ruta.findById(id, (err, dbRoute) => {
+        let arg = {
+            searchParams: [
+                ['ruta', id]
+            ]
+        };
+        if (Object.keys(req.query).length > 0) {
+            Object.entries(req.query).forEach(element => {
+                if (element[0] == 'fields') {
+                    element[1] = JSON.parse(element[1]);
+                }
+                arg[`${element[0]}`] = element[1];
+            });
+        }
+        let queryContent = {
+            keys: Object.keys(arg),
+            values: Object.values(arg)
+        };
+        let query = sqlBuilder('select', 'Rutas', queryContent);
+        db.query(query, (err, results, fields) => {
             if (err) {
                 return res.status(500).json({
                     err
                 });
             }
             res.json({
-                ruta: dbRoute
+                results: results[0]
             });
         });
     } else {
@@ -91,22 +112,36 @@ app.get('/route', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('ru_leer')) {
         // TODO: define search params
-        Ruta.find({}, 'ruta servicio tipoVehiculos referencia')
-            .skip(from)
-            .limit(limit)
-            .exec((err, routes) => {
-                if (err) {
-                    return res.status(400).json({
-                        err
-                    });
+        let body = _.pick(req.body, ['ruta', 'servicio', 'tipoDeVehiculos', 'referencia', 'vehiculo', 'zona', 'turno', 'numeroDeRuta', 'frecuencia', 'POA']);
+        let arg = {
+            bounds: [from, limit]
+        };
+        if (Object.entries(body).length > 0) {
+            arg.searchParams = Object.entries(body);
+        }
+        if (Object.keys(req.query).length > 0) {
+            Object.entries(req.query).forEach(element => {
+                if (element[0] == 'fields') {
+                    element[1] = JSON.parse(element[1]);
                 }
-                Ruta.countDocuments({}, (err, c) => {
-                    res.json({
-                        routes,
-                        count: c
-                    });
-                });
+                arg[`${element[0]}`] = element[1];
             });
+        }
+        let queryContent = {
+            keys: Object.keys(arg),
+            values: Object.values(arg)
+        };
+        let query = sqlBuilder('select', 'Rutas', queryContent);
+        db.query(query, (err, results, fields) => {
+            if (err) {
+                return res.status(500).json({
+                    err
+                });
+            }
+            res.json({
+                results
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -120,20 +155,39 @@ app.get('/route', verifyToken, (req, res) => {
 // Update user
 // ===============================================
 app.put('/route/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['ruta', 'servicio', 'tipoVehiculos', 'referencia', 'vehiculo', 'zonaYTurno', 'numeroRuta', 'frecuencia', 'POA']);
+    let body = _.pick(req.body, ['ruta', 'servicio', 'tipoDeVehiculos', 'referencia', 'vehiculo', 'zona', 'turno', 'numeroDeRuta', 'frecuencia', 'POA']);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ru_modificar')) {
-        Ruta.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, dbRoute) => {
-            if (err) {
-                return res.status(500).json({
-                    err
+        let arg = {
+            searchParams: [
+                ['ruta', id]
+            ]
+        };
+        if (Object.entries(body).length > 0) {
+            arg.fields = body;
+            let queryContent = {
+                keys: Object.keys(arg),
+                values: Object.values(arg)
+            };
+            let query = sqlBuilder('update', 'Rutas', queryContent);
+            db.query(query, (err, results, fields) => {
+                if (err) {
+                    return res.status(500).json({
+                        err
+                    });
+                }
+                res.json({
+                    results
                 });
-            }
-            res.json({
-                ruta: dbRoute
             });
-        });
+        } else {
+            return res.status(400).json({
+                err: {
+                    message: 'Nada que actualizar'
+                }
+            });
+        }
     } else {
         res.status(403).json({
             err: {
@@ -150,21 +204,24 @@ app.delete('/route/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ru_borrar')) {
-        Ruta.findByIdAndRemove(id, (err, deletedRoute) => {
+        let arg = {
+            searchParams: [
+                ['ruta', id]
+            ]
+        };
+        let queryContent = {
+            keys: Object.keys(arg),
+            values: Object.values(arg)
+        };
+        let query = sqlBuilder('delete', 'Rutas', queryContent);
+        db.query(query, (err, results, fields) => {
             if (err) {
                 return res.status(500).json({
                     err
                 });
             }
-            if (!deletedRoute) {
-                return res.status(400).json({
-                    err: {
-                        message: 'Ruta no encontrada'
-                    }
-                });
-            }
             res.json({
-                message: `La ruta ${deletedRoute.ruta} ha sido eliminada`
+                results
             });
         });
     } else {

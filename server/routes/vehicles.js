@@ -67,20 +67,39 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
         let arg = {
-            id
+            searchParams: [
+                ['movil', id]
+            ]
         };
-        if (req.query) {
-            arg.params = req.query;
+        if (Object.keys(req.query).length > 0) {
+            Object.entries(req.query).forEach(element => {
+                if (element[0] == 'fields') {
+                    element[1] = JSON.parse(element[1]);
+                }
+                arg[`${element[0]}`] = element[1];
+            });
         }
-        console.log(params);
         let bodyContent = {
             keys: Object.keys(arg),
             values: Object.values(arg)
         };
         let query = sqlBuilder('select', 'Vehiculos', bodyContent);
-        console.log(query);
-        res.json({
-            ok: true
+        db.query(query, 'Vehiculos', (err, results, fields) => {
+            if (err) {
+                return res.status(500).json({
+                    err
+                });
+            }
+            if (!results[0]) {
+                return res.status(404).json({
+                    err: {
+                        message: 'Vehículo no encontrado'
+                    }
+                });
+            }
+            res.json({
+                results: results[0]
+            });
         });
     } else {
         res.status(403).json({
@@ -102,22 +121,43 @@ app.get('/vehi', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
         // TODO: define search params and info needed
-        Vehiculo.find({}, 'movil placa tipo servicios')
-            .skip(from)
-            .limit(limit)
-            .exec((err, vehicles) => {
-                if (err) {
-                    return res.status(400).json({
-                        err
-                    });
+        let body = _.pick(req.body, ['movil', 'placa', 'tipoDeVehiculo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
+            'cargaToneladas', 'cargaMetrocCubicos', 'cargaCombustible', 'marca', 'modelo',
+            'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
+            'motor', 'turbo', 'chasis', 'serie', 'color'
+        ]);
+        let arg = {
+            bounds: [from, limit]
+        };
+        if (Object.entries(body).length > 0) {
+            arg.searchParams = Object.entries(body);
+        }
+        if (Object.keys(req.query).length > 0) {
+            Object.entries(req.query).forEach(element => {
+                if (element[0] == 'fields') {
+                    element[1] = JSON.parse(element[1]);
                 }
-                Vehiculo.countDocuments({}, (err, c) => {
-                    res.json({
-                        vehicles,
-                        count: c
-                    });
+                arg[`${element[0]}`] = element[1];
+            });
+        }
+        let bodyContent = {
+            keys: Object.keys(arg),
+            values: Object.values(arg)
+        };
+        let query = sqlBuilder('select', 'Vehiculos', bodyContent);
+        db.query(query, (err, results, fields) => {
+            if (err) {
+                return res.status(500).json({
+                    err
+                });
+            }
+            db.query('select count(*) from Vehiculos;', (err, counts, fields) => {
+                res.json({
+                    results,
+                    count: Number(counts[0][fields[0].name])
                 });
             });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -131,24 +171,43 @@ app.get('/vehi', verifyToken, (req, res) => {
 // Update vehicle
 // ===============================================
 app.put('/vehi/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['movil', 'placa', 'tipo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
-        'cargaToneladas', 'cargaMetrocCubicos', 'litros', 'marca', 'modelo',
+    let body = _.pick(req.body, ['movil', 'placa', 'tipoDeVehiculo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
+        'cargaToneladas', 'cargaMetrocCubicos', 'cargaCombustible', 'marca', 'modelo',
         'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
         'motor', 'turbo', 'chasis', 'serie', 'color'
     ]);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        Vehiculo.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, dbVehi) => {
-            if (err) {
-                return res.status(400).json({
-                    err
+        let arg = {
+            searchParams: [
+                ['movil', id]
+            ]
+        }
+        if (Object.entries(body).length > 0) {
+            arg.fields = body;
+            let bodyContent = {
+                keys: Object.keys(arg),
+                values: Object.values(arg)
+            };
+            let query = sqlBuilder('update', 'Vehiculos', bodyContent);
+            db.query(query, (err, results, fields) => {
+                if (err) {
+                    return res.status(500).json({
+                        err
+                    });
+                }
+                res.json({
+                    results
                 });
-            }
-            res.json({
-                vehicle: dbVehi
             });
-        });
+        } else {
+            return res.status(400).json({
+                err: {
+                    message: 'Nada que actualizar'
+                }
+            });
+        }
     } else {
         res.status(403).json({
             err: {
@@ -165,21 +224,24 @@ app.delete('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ve_borrar')) {
-        Vehiculo.findByIdAndRemove(id, (err, deletedVehi) => {
+        let arg = {
+            searchParams: [
+                ['movil', id]
+            ]
+        }
+        let bodyContent = {
+            keys: Object.keys(arg),
+            values: Object.values(arg)
+        };
+        let query = sqlBuilder('delete', 'Vehiculos', bodyContent);
+        db.query(query, (err, results, fields) => {
             if (err) {
                 return res.status(500).json({
                     err
                 });
             }
-            if (!deletedVehi) {
-                return res.status(400).json({
-                    err: {
-                        message: 'Vehículo no encontrado'
-                    }
-                });
-            }
             res.json({
-                message: `El móvil con código ${deletedVehi.movil} ha sido eliminado`
+                results
             });
         });
     } else {

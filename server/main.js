@@ -39,7 +39,8 @@ app.use(require('./routes/index'));
 // REST SERVER (Services)
 // ============================
 server.listen(process.env.PORT, () => {
-    console.log('Server online', process.env.PORT);
+    console.log('Server STATUS\t\t\tONLINE');
+    console.log(`Listening PORT\t\t\t${process.env.PORT}`);
 });
 
 process.on('SIGINT', function() {

@@ -8,33 +8,36 @@
 const express = require('express');
 const app = express();
 const _ = require('underscore');
-// ===============================================
-// Employee model
-// ===============================================
-const Personal = require('../Models/Personal');
 
 // ===============================================
 // Middlewares
 // ===============================================
 const { verifyToken } = require('../middlewares/authentication');
+const { sqlBuilder } = require('../classes/SQLBuilder');
+
+let db = process.dbConnection;
 
 // ===============================================
 // Create user
 // ===============================================
-app.post('/personnel', (req, res) => {
+app.post('/personnel', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('p_escribir')) {
         if (body.idPersonal && body.nombre && body.carnet && body.cargo && body.diasLaborales) {
-            let personnel = new Personal(body);
-            personnel.save((err, personnelDB) => {
+            let bodyContent = {
+                keys: Object.keys(body),
+                values: Object.values(body)
+            };
+            let query = sqlBuilder('insert', 'Personal', bodyContent);
+            db.query(query, (err, results, fields) => {
                 if (err) {
                     return res.status(500).json({
                         err
                     });
                 }
                 res.json({
-                    persona: personnelDB
+                    results
                 });
             });
         } else {
@@ -60,16 +63,7 @@ app.get('/personnel/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('p_leer')) {
-        Personal.findById(id, (err, personnelDB) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
-            }
-            res.json({
-                persona: personnelDB
-            });
-        });
+
     } else {
         res.status(403).json({
             err: {
@@ -90,22 +84,7 @@ app.get('/personnel', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('p_leer')) {
         // TODO: define search params
-        Personal.find({}, 'idPersonal nombre carnet diasLaborales')
-            .skip(from)
-            .limit(limit)
-            .exec((err, personas) => {
-                if (err) {
-                    return res.status(400).json({
-                        err
-                    });
-                }
-                Personal.countDocuments({}, (err, c) => {
-                    res.json({
-                        personas,
-                        count: c
-                    });
-                });
-            });
+
     } else {
         res.status(403).json({
             err: {
@@ -123,16 +102,7 @@ app.put('/personnel/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('p_modificar')) {
-        Personal.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, dbPersonnel) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
-            }
-            res.json({
-                persona: dbPersonnel
-            });
-        });
+
     } else {
         res.status(403).json({
             err: {
@@ -149,23 +119,7 @@ app.delete('/personnel/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('p_borrar')) {
-        Personal.findByIdAndRemove(id, (err, deletedPersonnel) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
-            }
-            if (!deletedPersonnel) {
-                return res.status(400).json({
-                    err: {
-                        message: 'Persona no encontrada'
-                    }
-                });
-            }
-            res.json({
-                message: `La persona con CI ${deletedPersonnel.carnet} ha sido eliminada`
-            });
-        });
+
     } else {
         res.status(403).json({
             err: {

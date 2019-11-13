@@ -22,15 +22,15 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 const mongoose = require('mongoose');
 process.env.URLDB = process.env.NODE_ENV === 'dev' ? 'mongodb+srv://AltitudeSolutions:uevboKDe660C43Nc@pruebas-34upj.mongodb.net/LPL' : process.env.MONGOURI;
 
-mongoose.connect(process.env.URLDB, { useFindAndModify: false, useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
-    (err) => {
-        if (err) {
-            console.log('Error de conexión con la base de datos');
-            throw err;
-        } else {
-            console.log('Base de datos ONLINE');
-        }
-    });
+// mongoose.connect(process.env.URLDB, { useFindAndModify: false, useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
+//     (err) => {
+//         if (err) {
+//             console.log('Error de conexión con la base de datos');
+//             throw err;
+//         } else {
+//             console.log('Base de datos ONLINE');
+//         }
+//     });
 
 
 // ===============================================
@@ -54,7 +54,13 @@ let dictumConnection = mysql.createConnection({
     database: 'DICTUM'
 });
 
-dictumConnection.connect();
+dictumConnection.connect(err => {
+    if (err) {
+        console.log(`Database STATUS\t\t\tOFFLINE\t\t(connection error)`);
+    } else {
+        console.log(`Database STATUS\t\t\tONLINE`);
+    }
+});
 
 // let  = mysql.createConnection({
 //     host: 'localhost',

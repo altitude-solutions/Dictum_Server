@@ -28,7 +28,7 @@ app.post('/login', (req, res) => {
             err: {
                 message: 'El nombre de usuario y la contraseña son necesarios'
             }
-        })
+        });
     }
     // Look for user in the database
     process.dbConnection.query(`select * from Usuarios where nombreUsuario="${body.nombreUsuario}"`, (err, results, fields) => {
@@ -55,12 +55,13 @@ app.post('/login', (req, res) => {
 
         dbUser.permisos = construirPermisos(dbUser.permisos);
 
+        delete dbUser.contra;
+        delete dbUser.recuperacion;
+
         let token = jwt.sign({
             user: dbUser
         }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
 
-        delete dbUser.contra;
-        delete dbUser.recuperacion;
         res.json({
             user: dbUser,
             token
@@ -68,5 +69,11 @@ app.post('/login', (req, res) => {
     });
 });
 
+app.post('/recovery', (req, res) => {
+    console.log(req.body);
+    res.json({
+        ok: true
+    });
+});
 
 module.exports = app;

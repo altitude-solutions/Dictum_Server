@@ -26,7 +26,10 @@ app.post('/vehi', verifyToken, (req, res) => {
     if (user.permisos.includes('ve_escribir')) {
         if (body.movil && body.placa && body.tipoDeVehiculo && body.marca && body.modelo && body.anio) {
             // TODO: Verificar el formato del código y si es necesario
-            body.codTipoDeVehiculo = `${body.placa}-${body.movil}`;
+            // body.codTipoDeVehiculo = `${body.placa}-${body.movil}`;
+            if (!body.codTipoDeVehiculo) {
+                body.codTipoDeVehiculo = null;
+            }
             let bodyContent = {
                 keys: Object.keys(body),
                 values: Object.values(body),

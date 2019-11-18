@@ -111,7 +111,6 @@ app.get('/route', verifyToken, (req, res) => {
     let limit = Number(req.query.to) || 15;
     let user = req.user;
     if (user.permisos.includes('ru_leer')) {
-        // TODO: define search params
         let body = _.pick(req.body, ['ruta', 'servicio', 'tipoDeVehiculos', 'referencia', 'vehiculo', 'zona', 'turno', 'numeroDeRuta', 'frecuencia', 'POA']);
         let arg = {
             bounds: [from, limit]

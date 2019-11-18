@@ -25,12 +25,39 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('es_escribir')) {
-        body.precioTotal = Number(body.precioTotal);
-        body.volumen = Number(body.volumen);
-        body.fecha = new Date(body.fecha);
+        if (body.inicioRuta) {
+            body.inicioRuta = new Date(body.inicioRuta).getTime();
+        }
+        if (body.finalRuta) {
+            body.finalRuta = new Date(body.finalRuta).getTime();
+        }
+        if (body.salidaBase) {
+            body.salidaBase = new Date(body.salidaBase).getTime();
+        }
+        if (body.retornoBase) {
+            body.retornoBase = new Date(body.retornoBase).getTime();
+        }
+        if (body.ingresoRelleno) {
+            body.ingresoRelleno = new Date(body.ingresoRelleno).getTime();
+        }
+        if (body.salidaRelleno) {
+            body.salidaRelleno = new Date(body.salidaRelleno).getTime();
+        }
+        let queryContent = {
+            keys: Object.keys(body),
+            values: Object.values(body)
+        };
+        let query = sqlBuilder('insert', 'RegistroDeHorarios', queryContent);
 
-        res.json({
-            ok: true
+        db.query(query, (err, results, fields) => {
+            if (err) {
+                return res.status(500).json({
+                    err
+                });
+            }
+            res.json({
+                results
+            });
         });
     } else {
         return res.status(403).json({

@@ -31,7 +31,7 @@ app.post('/login', (req, res) => {
         });
     }
     // Look for user in the database
-    process.dbConnection.query(`select * from Usuarios where nombreUsuario="${body.nombreUsuario}"`, (err, results, fields) => {
+    process.dbConnection.query(`select * from Usuarios where binary nombreUsuario="${body.nombreUsuario}"`, (err, results, fields) => {
         if (err) {
             return res.status(500).json({
                 err

@@ -25,8 +25,6 @@ app.post('/vehi', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('ve_escribir')) {
         if (body.movil && body.placa && body.tipoDeVehiculo && body.marca && body.modelo && body.anio) {
-            // TODO: Verificar el formato del código y si es necesario
-            // body.codTipoDeVehiculo = `${body.placa}-${body.movil}`;
             if (!body.codTipoDeVehiculo) {
                 body.codTipoDeVehiculo = null;
             }
@@ -123,7 +121,6 @@ app.get('/vehi', verifyToken, (req, res) => {
     let limit = Number(req.query.to) || 15;
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        // TODO: define search params and info needed
         let body = _.pick(req.body, ['movil', 'placa', 'tipoDeVehiculo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
             'cargaToneladas', 'cargaMetrocCubicos', 'cargaCombustible', 'marca', 'modelo',
             'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
@@ -157,7 +154,8 @@ app.get('/vehi', verifyToken, (req, res) => {
             db.query('select count(*) from Vehiculos;', (err, counts, fields) => {
                 res.json({
                     results,
-                    count: Number(counts[0][fields[0].name])
+                    count: Number(counts[0][fields[0].name]),
+                    requestValue: "Lista de Vehiculos",
                 });
             });
         });

@@ -27,16 +27,16 @@ let sqlBuilder = (operation, table, body) => {
                 for (let index = 0; index < body.values[i].length; index++) {
                     switch (typeof body.values[i][index][1]) {
                         case 'object':
-                            arg.push(`${body.values[i][index][0]}="${JSON.stringify(body.values[i][index][1]).replace(/"/g, '\'')}"`);
+                            arg.push(`${body.values[i][index][0]} regexp "${JSON.stringify(body.values[i][index][1]).replace(/"/g, '\'')}"`);
                             break;
                         case 'string':
-                            arg.push(`${body.values[i][index][0]}="${body.values[i][index][1]}"`);
+                            arg.push(`${body.values[i][index][0]} regexp "${body.values[i][index][1]}"`);
                             break;
                         case 'number':
-                            arg.push(`${body.values[i][index][0]}=${body.values[i][index][1]}`);
+                            arg.push(`${body.values[i][index][0]} regexp ${body.values[i][index][1]}`);
                             break;
                         case 'boolean':
-                            arg.push(`${body.values[i][index][0]}=${body.values[i][index][1]? 1:0}`);
+                            arg.push(`${body.values[i][index][0]} regexp ${body.values[i][index][1]? 1:0}`);
                             break;
                     }
                 }

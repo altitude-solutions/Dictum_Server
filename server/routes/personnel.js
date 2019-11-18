@@ -117,7 +117,6 @@ app.get('/personnel', verifyToken, (req, res) => {
     let limit = Number(req.query.to) || 15;
     let user = req.user;
     if (user.permisos.includes('p_leer')) {
-        // TODO: define search params
         let body = _.pick(req.body, ['idPersonal', 'nombre', 'carnet', 'cargo', 'proyecto', 'turno', 'zona', 'subZona', 'ruta', 'supervisor', 'diasLaborales']);
         let arg = {
             bounds: [from, limit]

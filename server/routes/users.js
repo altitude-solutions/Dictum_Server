@@ -139,7 +139,6 @@ app.get('/users', verifyToken, (req, res) => {
     let limit = Number(req.query.to) || 15;
     let user = req.user;
     if (user.permisos.includes('u_leer')) {
-        // TODO: define search params
         process.dbConnection.query(`select nombreUsuario, permisos, empresa, nombreReal from Usuarios limit ${from}, ${limit}`, (err, results, fields) => {
             if (err) {
                 return res.status(500).json({

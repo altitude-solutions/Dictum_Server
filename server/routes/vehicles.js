@@ -124,7 +124,7 @@ app.get('/vehi', verifyToken, (req, res) => {
         let body = _.pick(req.body, ['movil', 'placa', 'tipoDeVehiculo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
             'cargaToneladas', 'cargaMetrocCubicos', 'cargaCombustible', 'marca', 'modelo',
             'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
-            'motor', 'turbo', 'chasis', 'serie', 'color'
+            'motor', 'turbo', 'chasis', 'serie', 'color', 'conductor', 'conductor_2', 'numeroDeAyudantes'
         ]);
         let arg = {
             bounds: [from, limit]
@@ -175,7 +175,7 @@ app.put('/vehi/:id', verifyToken, (req, res) => {
     let body = _.pick(req.body, ['movil', 'placa', 'tipoDeVehiculo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
         'cargaToneladas', 'cargaMetrocCubicos', 'cargaCombustible', 'marca', 'modelo',
         'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
-        'motor', 'turbo', 'chasis', 'serie', 'color'
+        'motor', 'turbo', 'chasis', 'serie', 'color', 'conductor', 'conductor_2', 'numeroDeAyudantes'
     ]);
     let id = req.params.id;
     let user = req.user;

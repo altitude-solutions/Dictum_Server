@@ -39,6 +39,7 @@ app.use(require('./routes/index'));
 // REST SERVER (Services)
 // ============================
 server.listen(process.env.PORT, () => {
+    console.log(`Session started at ${new Date().toLocaleString()}`);
     console.log('Server STATUS\t\t\tONLINE');
     console.log(`Listening PORT\t\t\t${process.env.PORT}`);
 });

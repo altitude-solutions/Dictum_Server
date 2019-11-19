@@ -78,7 +78,8 @@ let disconnectDB = () => {
         if (err) {
             console.log('Could not disconnect from mongodb');
         } else {
-            console.log('Disconnected');
+            console.log('\nDisconnected');
+            console.log(`Session terminated at ${new Date().toLocaleString()}`);
         }
     });
 

@@ -115,10 +115,10 @@ let sqlBuilder = (operation, table, body) => {
                         updateString.push(`${element[0]}=${element[1]?1:0}`);
                         break;
                     case 'string':
-                        updateString.push(`${element[0]}="${element[1]}"`);
+                        updateString.push(`${element[0]}=${element[1]}`);
                         break;
                     case 'object':
-                        updateString.push(`${element[0]}="${JSON.stringify(element[1]).replace(/"/g, '\'')}"`);
+                        updateString.push(`${element[0]}=${JSON.stringify(element[1]).replace(/"/g, '\'')}`);
                         break;
                 }
             });

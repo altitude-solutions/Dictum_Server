@@ -137,8 +137,12 @@ app.get('/route', verifyToken, (req, res) => {
                     err
                 });
             }
-            res.json({
-                results
+            db.query('select count(*) from Rutas;', (err, counts, fie) => {
+                res.json({
+                    results,
+                    count: results.length
+                        // count: Number(counts[0][fields[0].name])
+                });
             });
         });
     } else {

@@ -137,16 +137,20 @@ app.get('/personnel', verifyToken, (req, res) => {
             values: Object.values(arg)
         };
         let query = sqlBuilder('select', 'Personal', queryContent);
-        db.query(query, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
+        db.query('select count(*) from Personal;', (err, counts, fiel) => {
+            db.query(query, (err, results, fields) => {
+                if (err) {
+                    return res.status(500).json({
+                        err
+                    });
+                }
+                res.json({
+                    results,
+                    count: results.length
                 });
-            }
-            res.json({
-                results
             });
-        });
+        })
+
     } else {
         res.status(403).json({
             err: {

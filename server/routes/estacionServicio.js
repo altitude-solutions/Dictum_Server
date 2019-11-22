@@ -27,10 +27,15 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
     let user = req.user;
 
     if (user.permisos.includes('es_escribir')) {
+        body.precioTotal = String(body.precioTotal).replace(',', '.');
         body.precioTotal = Number(body.precioTotal);
+
+        body.volumen = String(body.volumen).replace(',', '.');
         body.volumen = Number(body.volumen);
+
         body.fecha = new Date(body.fecha).getTime();
         if (body.kilometraje) {
+            body.kilometraje = String(body.kilometraje).replace(',', '.');
             body.kilometraje = Number(body.kilometraje);
         }
         let queryContent = {

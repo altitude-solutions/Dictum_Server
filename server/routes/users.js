@@ -151,7 +151,7 @@ app.get('/users', verifyToken, (req, res) => {
             process.dbConnection.query('SELECT count(*) from Usuarios;', (err, counts, fields) => {
                 res.json({
                     results,
-                    count: Number(counts[0][fields[0].name])
+                    count: Number(counts[0]['count(*)'])
                 });
             });
         });

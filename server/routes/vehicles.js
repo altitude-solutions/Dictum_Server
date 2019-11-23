@@ -154,7 +154,7 @@ app.get('/vehi', verifyToken, (req, res) => {
             db.query('select count(*) from Vehiculos;', (err, counts, fields) => {
                 res.json({
                     results,
-                    count: Number(counts[0][fields[0].name]),
+                    count: Number(counts[0]['count(*)']),
                     requestValue: "Lista de Vehiculos",
                 });
             });

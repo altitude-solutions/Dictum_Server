@@ -26,7 +26,7 @@ let saveUserToDB = (req, res, noUsers = false) => {
     if (body.nombreUsuario && body.contra && body.ci) {
         body.contra = bcrypt.hashSync(body.contra, 10);
         if (noUsers) {
-            body.permisos = '1111 1111 1111 1111 1111 1111';
+            body.permisos = '1111 1111 1111 1111 1111 1111 1111 1111';
         } else {
             if (body.permisos) {
                 body.permisos = empaquetarPermisos(body.permisos);

@@ -49,6 +49,8 @@ let empaquetarPermisos = (permiArray) => {
         }
         if ((i + 1) % 4 == 0) aux += ' ';
     }
+    // Remove the las space
+    aux = aux.substring(0, aux.length - 1);
     return aux;
 };
 

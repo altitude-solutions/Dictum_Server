@@ -16,6 +16,8 @@ app.use(require('./routes'));
 app.use(require('./personnel'));
 app.use(require('./estacionServicio'));
 app.use(require('./registroDeHorarios'));
+app.use(require('./customSql'));
+
 
 
 module.exports = app;

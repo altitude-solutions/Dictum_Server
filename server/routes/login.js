@@ -22,6 +22,7 @@ const { construirPermisos } = require('../classes/Permisos');
 app.post('/login', (req, res) => {
     // request body
     let body = req.body;
+
     // verify if required fields are there, if not send bad request error
     if (!body.nombreUsuario || !body.contra) {
         return res.status(400).json({

@@ -17,10 +17,7 @@ let verifyToken = (req, res, next) => {
     jwt.verify(token, process.env.SEED, (err, decoded) => {
         if (err) {
             return res.status(400).json({
-                err: {
-                    err,
-                    message: 'Token inválido'
-                }
+                err
             });
         } else {
             req.user = decoded.user;

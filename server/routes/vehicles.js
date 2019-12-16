@@ -13,9 +13,13 @@ const _ = require('underscore');
 // Middlewares
 // ===============================================
 const { verifyToken } = require('../middlewares/authentication');
-const { sqlBuilder } = require('../classes/SQLBuilder');
 
-let db = process.dbConnection;
+// ===============================================
+// Vehicule's related Models
+// ===============================================
+const { CodigoTipoDeVehiculo, Vehiculo } = require('../Models/Vehicle');
+const { Proyecto } = require('../Models/Proyectos');
+
 
 // ===============================================
 // Create vehicle
@@ -25,25 +29,9 @@ app.post('/vehi', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('ve_escribir')) {
         if (body.movil && body.placa && body.tipoDeVehiculo && body.marca && body.modelo && body.anio) {
-            if (!body.codTipoDeVehiculo) {
-                body.codTipoDeVehiculo = null;
-            }
-            let bodyContent = {
-                keys: Object.keys(body),
-                values: Object.values(body),
-            };
-            let query = sqlBuilder('insert', 'Vehiculos', bodyContent);
-            db.query(query, (err, results, fields) => {
-                if (err) {
-                    return res.status(500).json({
-                        err
-                    });
-                }
-                res.json({
-                    results
-                });
+            res.json({
+                ok: true
             });
-
         } else {
             res.status(400).json({
                 err: {
@@ -54,7 +42,7 @@ app.post('/vehi', verifyToken, (req, res) => {
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para crear vehículos'
+                message: 'Acceso denegado'
             }
         });
     }

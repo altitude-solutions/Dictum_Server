@@ -16,24 +16,6 @@ process.env.PORT = process.env.PORT || 3000;
 process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 
 // ===============================================
-// Database connection
-// ===============================================
-
-const mongoose = require('mongoose');
-process.env.URLDB = process.env.NODE_ENV === 'dev' ? 'mongodb+srv://AltitudeSolutions:uevboKDe660C43Nc@pruebas-34upj.mongodb.net/LPL' : process.env.MONGOURI;
-
-// mongoose.connect(process.env.URLDB, { useFindAndModify: false, useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true },
-//     (err) => {
-//         if (err) {
-//             console.log('Error de conexión con la base de datos');
-//             throw err;
-//         } else {
-//             console.log('Base de datos ONLINE');
-//         }
-//     });
-
-
-// ===============================================
 // Token
 // ===============================================
 process.env.CADUCIDAD_TOKEN = process.env.CADUCIDAD_TOKEN || '24h';
@@ -44,51 +26,12 @@ process.env.CADUCIDAD_TOKEN = process.env.CADUCIDAD_TOKEN || '24h';
 process.env.SEED = process.env.SEED || 'development-seed';
 
 // ===============================================
-// Maria DB connection
+// Database connection
 // ===============================================
-const mysql = require('mysql');
-let dictumConnection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'm4r14db-r00t-89',
-    database: 'DICTUM'
-});
-
-dictumConnection.connect(err => {
-    if (err) {
-        console.log(`Database STATUS\t\t\tOFFLINE\t\t(connection error)`);
-    } else {
-        console.log(`Database STATUS\t\t\tONLINE`);
-    }
-});
-
-// let  = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'root',
-//     password: 'm4r14db-r00t-89',
-//     database: 'LPL'
-// });
-
-
-// ===============================================
-// Close conecionts
-// ===============================================
-let disconnectDB = () => {
-    mongoose.disconnect(err => {
-        if (err) {
-            console.log('Could not disconnect from mongodb');
-        } else {
-            console.log('\nDisconnected');
-            console.log(`Session terminated at ${new Date().toLocaleString()}\n\n`);
-        }
+const { sql } = require('./sql');
+sql.authenticate()
+    .then(() => {
+        console.log('Database STATUS\t\t\tONLINE');
+    }).catch(err => {
+        console.log(err);
     });
-
-    dictumConnection.end();
-}
-
-process.dbConnection = dictumConnection;
-
-module.exports = {
-    disconnectDB
-    // lplConnectio
-};

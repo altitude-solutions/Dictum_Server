@@ -5,9 +5,16 @@
  *
  **/
 
-const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
 
+const { Model, DataTypes } = require('sequelize');
+const { sql } = require('../config/sql');
+
+// ===============================================
+// External Models
+// ===============================================
+const { Proyecto } = require('./Proyectos');
+
+/*
 // ===============================================
 // Turnos válidos
 // ===============================================
@@ -15,7 +22,6 @@ let turnosValidos = {
     values: ['nocturno', 'diurno', 'vespertino'],
     message: '{VALUE} no es un turno válido'
 }
-
 // ===============================================
 // Dias laborales
 // ===============================================
@@ -23,64 +29,61 @@ let diasLaborales = {
     values: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
     message: '{VALUE} no es un día válido'
 }
+*/
+
 
 // ===============================================
-// Modelo de empleado
+// Personnel model
 // ===============================================
-let Personal = new mongoose.Schema({
+class Personal extends Model {};
+Personal.init({
     idPersonal: {
-        type: String,
-        required: [true, 'El ID de la persona es necesario'],
-        unique: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true
     },
     nombre: {
-        type: [String],
-        required: [true, 'El nombre de la persona es necesario']
+        type: DataTypes.STRING
     },
     carnet: {
-        type: String,
-        required: [true, 'El carnet de la persona es necesario']
+        type: DataTypes.STRING
     },
     cargo: {
-        type: String,
-        required: [true, 'El cargo de la persona es necesaria']
-    },
-    proyecto: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
     },
     turno: {
-        type: String,
-        required: false,
-        enum: turnosValidos
+        type: DataTypes.ENUM(['Nocturno', 'Diurno', 'Tarde'])
     },
-    zonaYRuta: {
-        type: [Object],
-        required: false
+    lugarDeTrabajo: {
+        type: DataTypes.STRING
     },
-    subZona: {
-        type: String,
-        required: false
-    },
-    supervisor: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false
+    seccion: {
+        type: DataTypes.STRING
     },
     diasLaborales: {
-        type: [String],
-        enum: diasLaborales,
-        required: [true, 'Los dias laborales son necesarios']
+        type: DataTypes.STRING
+    },
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
+}, {
+    sequelize: sql,
+    modelName: 'Personal',
+    timestamps: false
 });
 
-// ===============================================
-// Validar los permisos del personal
-// ===============================================
-Personal.plugin(uniqueValidator, {
-    message: '{PATH} debe ser único'
+Personal.belongsTo(Proyecto, {
+    foreignKey: 'proyecto'
+});
+
+Personal.belongsTo(Personal, {
+    foreignKey: 'superior'
 });
 
 // ===============================================
 // Export Personal model
 // ===============================================
-module.exports = mongoose.model('Personal', Personal);
+module.exports = {
+    Personal
+}

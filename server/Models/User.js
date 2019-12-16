@@ -6,9 +6,11 @@
  **/
 
 
-const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
 
+const { Model, DataTypes } = require('sequelize');
+const { sql } = require('../config/sql');
+
+/*
 // ===============================================
 // Permisos válidos
 // ===============================================
@@ -19,57 +21,59 @@ let validEmployeeRoles = {
         'u_leer', 'u_escribir', 'u_borrar', 'u_modificar', // usuarios
         'ru_leer', 'ru_escribir', 'ru_borrar', 'ru_modificar', // rutas
         'p_leer', 'p_escribir', 'p_borrar', 'p_modificar', // personal
-        've_leer', 've_escribir', 've_borrar', 've_modificar' // vehículos
+        've_leer', 've_escribir', 've_borrar', 've_modificar', // vehículos
+        'io_leer', 'io_escribir', 'io_borrar', 'io_modificar', // Entradas y salidas
+        'fin_leer', 'fin_escribir', 'fin_borrar', 'fin_modificar' // Finanzas
     ],
     message: '{VALUE} no es un permiso válido'
 }
+*/
 
 // ===============================================
-// Modelo de empleado
+// Usuario Model
 // ===============================================
-let Usuario = new mongoose.Schema({
+class Usuario extends Model {};
+Usuario.init({
     nombreUsuario: {
-        type: String,
-        required: [true, 'El nombre del usuario es necesario'],
-        unique: true
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true
     },
     permisos: {
-        type: [String],
-        enum: validEmployeeRoles
+        type: DataTypes.STRING,
+        allowNull: false
     },
     contra: {
-        type: String,
-        required: [true, 'La contraseña es necesaria']
+        type: DataTypes.STRING,
+        allowNull: false
     },
     recuperacion: {
-        type: String,
-        required: [true, 'La clave de recuperación es necesaria']
+        type: DataTypes.STRING
+    },
+    correo: {
+        type: DataTypes.STRING
     },
     empresa: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
+    },
+    nombreReal: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
+}, {
+    sequelize: sql,
+    modelName: 'Usuarios',
+    timestamps: false
 });
 
-// ===============================================
-// Validar los permisos del usuario
-// ===============================================
-Usuario.plugin(uniqueValidator, {
-    message: '{PATH} debe ser único'
-});
-
-// ===============================================
-// Remove password and recovery code
-// ===============================================
-Usuario.methods.toJSON = function() {
-    let Employee = this;
-    let EmployeeObj = Employee.toObject();
-    delete EmployeeObj.contra;
-    delete EmployeeObj.recuperacion
-    return EmployeeObj;
-};
 
 // ===============================================
 // Export Usuario model
 // ===============================================
-module.exports = mongoose.model('Usuario', Usuario);
+module.exports = {
+    Usuario
+}

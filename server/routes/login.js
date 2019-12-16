@@ -11,10 +11,15 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 // ===============================================
 // User model
-// ===============================================
-// const Usuario = require('../Models/User');
+// ===============================================0
+const { Usuario } = require('../Models/User');
 
+// ===============================================
+// Permisos Builder
+// ===============================================
 const { construirPermisos } = require('../classes/Permisos');
+
+const { DataTypes } = require('sequelize');
 
 // ===============================================
 // Login service
@@ -32,21 +37,10 @@ app.post('/login', (req, res) => {
         });
     }
     // Look for user in the database
-    process.dbConnection.query(`select * from Usuarios where binary nombreUsuario="${body.nombreUsuario}"`, (err, results, fields) => {
-        if (err) {
-            return res.status(500).json({
-                err
-            });
-        }
-        if (!results[0]) {
-            return res.status(403).json({
-                err: {
-                    message: 'Usuario o contraseña incorrectos'
-                }
-            });
-        }
-        let dbUser = results[0];
-        if (!bcrypt.compareSync(body.contra, dbUser.contra)) {
+    Usuario.findByPk(String(body.nombreUsuario), {
+        attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'contra', 'empresa', 'correo']
+    }).then(DbUser => {
+        if (!DbUser) {
             return res.status(403).json({
                 err: {
                     message: 'Usuario o contraseña incorrectos'
@@ -54,19 +48,46 @@ app.post('/login', (req, res) => {
             });
         }
 
-        dbUser.permisos = construirPermisos(dbUser.permisos);
+        if (DbUser.nombreUsuario != body.nombreUsuario) {
+            return res.status(403).json({
+                err: {
+                    message: 'Usuario o contraseña incorrectos'
+                }
+            });
+        }
 
-        delete dbUser.contra;
-        delete dbUser.recuperacion;
-
+        if (!bcrypt.compareSync(body.contra, DbUser.contra)) {
+            return res.status(403).json({
+                err: {
+                    message: 'Usuario o contraseña incorrectos'
+                }
+            });
+        }
+        DbUser.permisos = construirPermisos(DbUser.permisos);
         let token = jwt.sign({
-            user: dbUser
+            user: {
+                nombreUsuario: DbUser.nombreUsuario,
+                nombreReal: DbUser.nombreReal,
+                permisos: DbUser.permisos,
+                empresa: DbUser.empresa,
+                correo: DbUser.correo
+            }
         }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
-
-        res.json({
-            user: dbUser,
+        return res.json({
+            user: {
+                nombreUsuario: DbUser.nombreUsuario,
+                nombreReal: DbUser.nombreReal,
+                permisos: DbUser.permisos,
+                empresa: DbUser.empresa,
+                correo: DbUser.correo
+            },
             token
-        })
+        });
+    }).catch(err => {
+        console.log(err);
+        return res.status(403).json({
+            err
+        });
     });
 });
 

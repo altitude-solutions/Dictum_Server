@@ -9,7 +9,7 @@
 // Server main file
 // ===============================================
 // Config
-let { disconnectDB } = require('./config/config');
+require('./config/config');
 // Express server
 const express = require('express');
 // Http server
@@ -45,6 +45,5 @@ server.listen(process.env.PORT, () => {
 });
 
 process.on('SIGINT', function() {
-    disconnectDB();
     process.exit();
 });

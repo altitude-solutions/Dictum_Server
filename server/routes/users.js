@@ -21,75 +21,99 @@ const jwt = require('jsonwebtoken');
 const { verifyToken } = require('../middlewares/authentication');
 const { construirPermisos, empaquetarPermisos } = require('../classes/Permisos');
 
-let saveUserToDB = (req, res, noUsers = false) => {
-    let body = req.body;
-    if (body.nombreUsuario && body.contra && body.ci) {
-        body.contra = bcrypt.hashSync(body.contra, 10);
-        if (noUsers) {
-            body.permisos = '1111 1111 1111 1111 1111 1111 1111 1111';
-        } else {
-            if (body.permisos) {
-                body.permisos = empaquetarPermisos(body.permisos);
-            }
-        }
-        let schema = `nombreUsuario, permisos, contra, recuperacion, nombreReal`;
-        let values = `"${body.nombreUsuario}", "${body.permisos}", "${body.contra}", "${body.ci}", "${body.nombreReal}"`;
-        if (body.empresa) {
-            schema += ', empresa',
-                values += `, "${body.empresa}"`
-        }
-        process.dbConnection.query(`INSERT INTO Usuarios (${schema}) values (${values})`, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
-            }
-            res.json({
-                results,
-                fields
-            });
-        });
-    }
-};
+// Usuario Model
+
+const { Usuario } = require('../Models/User');
 
 
 // ===============================================
 // Create user
 // ===============================================
 app.post('/users', (req, res) => {
-    process.dbConnection.query('SELECT count(*) from Usuarios;', (err, results, fields) => {
-        if (err) {
+    let body = req.body;
+    if (!body.nombreUsuario || !body.nombreReal || !body.permisos || !body.contra || !body.recuperacion) {
+        return res.status(400).json({
+            err: {
+                message: 'Los campos necesarios nombre de usuario, nombre real, permisos, contraseña, recuperacion'
+            }
+        });
+    } else {
+        // Pack permisos array into 0-1 string
+        body.permisos = empaquetarPermisos(body.permisos);
+        // Hash password for secure storage
+        body.contra = bcrypt.hashSync(body.contra, 10);
+        Usuario.count({}).then(count => {
+            if (count > 0) {
+                // There is at least one user. Then there is a root user
+                // Verify token
+                let token = req.get('token');
+                jwt.verify(token, process.env.SEED, (err, decoded) => {
+                    if (err) {
+                        // wrong Token
+                        return res.status(400).json({
+                            err
+                        });
+                    } else {
+                        // Token verifed
+                        let user = decoded.user;
+                        if (user.permisos.includes('u_escribir')) {
+                            Usuario.create(body).then(DBuser => {
+                                Usuario.findByPk(DBuser.get('nombreUsuario'), {
+                                    attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo']
+                                }).then(returnUser => {
+                                    return res.json({
+                                        user: returnUser
+                                    });
+                                }).catch(err => {
+                                    console.log(err);
+                                    return res.status(500).json({
+                                        err
+                                    });
+                                });
+                            }).catch(err => {
+                                res.status(500).json({
+                                    err
+                                });
+                            });
+                        } else {
+                            res.status(403).json({
+                                err: {
+                                    message: 'Acceso denegado'
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+                // There are no users then create root, Override permisos to create root user
+                body.permisos = '1111 1111 1111 1111 1111 1111 1111 1111';
+                Usuario.create(body).then(DBuser => {
+                    Usuario.findByPk(DBuser.get('nombreUsuario'), {
+                        attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo']
+                    }).then(returnUser => {
+                        return res.json({
+                            user: returnUser
+                        });
+                    }).catch(err => {
+                        console.log(err);
+                        return res.status(500).json({
+                            err
+                        });
+                    });
+                }).catch(err => {
+                    console.log(err);
+                    return res.status(500).json({
+                        err
+                    });
+                });
+            }
+        }).catch(err => {
+            console.log(err);
             return res.status(500).json({
                 err
             });
-        }
-        let len = Number(results[0][fields[0].name]);
-        if (len >= 1) {
-            let token = req.get('token');
-            jwt.verify(token, process.env.SEED, (err, decoded) => {
-                if (err) {
-                    return res.status(400).json({
-                        err: {
-                            err,
-                            message: 'Token inválido'
-                        }
-                    });
-                }
-                let user = decoded.user;
-                if (user.permisos.includes('u_escribir')) {
-                    saveUserToDB(req, res);
-                } else {
-                    return res.status(403).json({
-                        err: {
-                            message: 'No autorizado'
-                        }
-                    });
-                }
-            });
-        } else {
-            saveUserToDB(req, res, true);
-        }
-    });
+        });
+    }
 });
 
 // ===============================================
@@ -99,31 +123,35 @@ app.get('/users/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('u_leer')) {
-
-        process.dbConnection.query(`select * from Usuarios where nombreUsuario="${id}"`, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
+        Usuario.findByPk(id, {
+            attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo']
+        }).then(dbUser => {
+            if (!dbUser) {
+                return res.status(404).json({
+                    err: {
+                        message: `${id} no encontrado`
+                    }
                 });
             }
-            if (results[0]) {
-                let dbUser = results[0];
-                dbUser.permisos = construirPermisos(dbUser.permisos);
-                delete dbUser.contra;
-                return res.json({
-                    user: dbUser
+            if (dbUser.nombreUsuario != id) {
+                return res.status(404).json({
+                    err: {
+                        message: `${id} no encontrado`
+                    }
                 });
             }
-            res.status(404).json({
-                err: {
-                    message: `${id} no encontrado`
-                }
+            res.json({
+                user: dbUser
+            });
+        }).catch(err => {
+            return res.status(500).json({
+                err
             });
         });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar usuarios'
+                message: 'Acceso denegado'
             }
         });
     }
@@ -139,26 +167,35 @@ app.get('/users', verifyToken, (req, res) => {
     let limit = Number(req.query.to) || 15;
     let user = req.user;
     if (user.permisos.includes('u_leer')) {
-        process.dbConnection.query(`select nombreUsuario, permisos, empresa, nombreReal from Usuarios limit ${from}, ${limit}`, (err, results, fields) => {
-            if (err) {
+        Usuario.count({})
+            .then(count => {
+                Usuario.findAll({
+                    attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo'],
+                    offset: from,
+                    limit
+                }).then(users => {
+                    for (let i = 0; i < users.length; i++) {
+                        users[i].permisos = construirPermisos(users[i].permisos);
+                    }
+                    res.json({
+                        users,
+                        count
+                    });
+                }).catch(err => {
+                    return res.status(500).json({
+                        err
+                    });
+                });
+            }).catch(err => {
+                console.log(err);
                 return res.status(500).json({
                     err
                 });
-            }
-            for (let i = 0; i < results.length; i++) {
-                results[i].permisos = construirPermisos(results[i].permisos);
-            }
-            process.dbConnection.query('SELECT count(*) from Usuarios;', (err, counts, fields) => {
-                res.json({
-                    results,
-                    count: Number(counts[0]['count(*)'])
-                });
             });
-        });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar usuarios'
+                message: 'Acceso denegado'
             }
         });
     }
@@ -168,49 +205,42 @@ app.get('/users', verifyToken, (req, res) => {
 // Update user
 // ===============================================
 app.put('/users/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['permisos', 'contra', 'empresa', 'recuperacion', 'nombreReal']);
+    let body = _.pick(req.body, ['permisos', 'contra', 'empresa', 'recuperacion', 'correo', 'nombreReal']);
     let id = req.params.id;
     let user = req.user;
 
-    let updateString = [];
     if (user.permisos.includes('u_modificar')) {
+        if (body && !user.permisos.includes('u_leer')) {
+            return res.status(403).json({
+                err: {
+                    message: 'Acceso denegado'
+                }
+            });
+        }
         if (body.contra) {
             body.contra = bcrypt.hashSync(body.contra, 10);
-            updateString.push(`contra="${body.contra}"`);
-        }
-        if (body.nombreUsuario) {
-            updateString.push(`nombreUsuario="${body.nombreUsuario}"`);
-        }
-        if (body.empresa) {
-            updateString.push(`empresa="${body.empresa}"`);
-        }
-        if (body.recuperacion) {
-            updateString.push(`recuperacion="${body.recuperacion}"`)
         }
         if (body.permisos) {
             body.permisos = empaquetarPermisos(body.permisos);
-            updateString.push(`permisos="${body.permisos}"`);
         }
-        if (body.nombreReal) {
-            updateString.push(`nombreReal="${body.nombreReal}"`);
-        }
-        updateString = updateString.join(',');
-
-        process.dbConnection.query(`update Usuarios set ${updateString} where nombreusuario="${id}"`, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
+        Usuario.update(body, {
+            where: {
+                nombreUsuario: id
             }
+        }).then(affected => {
             res.json({
-                results
+                affected
+            });
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({
+                err
             });
         });
-
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para modificar usuarios'
+                message: 'Acceso denegado'
             }
         });
     }
@@ -223,20 +253,26 @@ app.delete('/users/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('u_borrar')) {
-        process.dbConnection.query(`delete from Usuarios where nombreUsuario="${id}"`, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
+        Usuario.update({
+            estado: false
+        }, {
+            where: {
+                nombreUsuario: id
             }
+        }).then(affected => {
             res.json({
-                results
+                affected
+            });
+        }).catch(err => {
+            console.log(err);
+            res.status(500).json({
+                err
             });
         });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para borrar usuarios'
+                message: 'Acceso denegado'
             }
         });
     }

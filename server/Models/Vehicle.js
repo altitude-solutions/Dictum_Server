@@ -5,137 +5,140 @@
  *
  **/
 
-const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
+
+const { Model, DataTypes } = require('sequelize');
+const { sql } = require('../config/sql');
 
 // ===============================================
-// tipos de vehiculos válidos
+// External Models
 // ===============================================
-let tipoDeVehiculo = {
-    values: ['Carga Trasera', 'Carga Lateral', 'Volqueta', 'Roll On/Off', 'Cisterna', 'Furgon', 'Furgoneta', 'Barredora', 'Fregadora', 'Bus', 'Camioneta'],
-    message: '{VALUE} no es un tipo de vehículo válido'
-}
+const { Proyecto } = require('./Proyectos');
+const { MotivosDePago } = require('./Pagos');
 
-// ===============================================
-// servicios válidos
-// ===============================================
-let tipoDeServicio = {
-    values: ['Recoleccion', 'Transferencia', 'Lavado', 'Barrido Mecanizado', 'Transporte', 'Supervisión', 'Mantenimiento', 'Autosocorro', 'Administración'],
-    message: '{VALUE} no es un servicio válido'
-}
 
 
 // ===============================================
-// Modelo de vehiculo
+// CodigoTipoDeVehiculo
 // ===============================================
-let Vehiculo = new mongoose.Schema({
-    movil: {
-        type: String,
-        required: [true, 'El número de móvil es necesario'],
-        unique: true
+class CodigoTipoDeVehiculo extends Model {};
+CodigoTipoDeVehiculo.init({
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
     },
-    placa: {
-        type: String,
-        required: [true, 'La placa del vehículo es necesaria'],
-        unique: true
+    codigo: {
+        type: DataTypes.STRING
     },
     tipo: {
-        type: String,
-        enum: tipoDeVehiculo,
-        required: [true, 'El tipo del vehículo es necesario']
+        type: DataTypes.INTEGER
+    }
+}, {
+    sequelize: sql,
+    modelName: 'CodigosTiposDeVehiculo'
+});
+
+// ===============================================
+// Vehicule Model
+// ===============================================
+class Vehiculo extends Model {};
+Vehiculo.init({
+    movil: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        primaryKey: true
     },
-    servicios: {
-        type: [String],
-        enum: tipoDeServicio,
-        required: false
-    },
-    codTipoDeVehiculo: {
-        type: String,
-        required: [true, 'El código del tipo de vehículo es necesario']
+    placa: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     descripcion: {
-        type: String,
-        required: true
+        type: DataTypes.STRING
     },
     cargaToneladas: {
-        type: Number,
-        required: false
+        type: DataTypes.FLOAT
     },
-    cargaMetrocCubicos: {
-        type: Number,
-        required: false
+    cargaMetrosCubicos: {
+        type: DataTypes.FLOAT
     },
     cargaLitros: {
-        type: Number,
-        required: false
+        type: DataTypes.FLOAT
     },
     marca: {
-        type: String,
-        required: [true, 'La marca es necesaria']
+        type: DataTypes.STRING
     },
     modelo: {
-        type: String,
-        required: [true, 'El modelo es necesario']
+        type: DataTypes.STRING
     },
     version: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
     },
     anio: {
-        type: Number,
-        required: [true, 'El año del vehículo es necesario']
+        type: DataTypes.INTEGER
     },
     cilindrada: {
-        type: Number,
-        required: false
+        type: DataTypes.FLOAT
     },
     traccion: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
     },
     peso: {
-        type: Number,
-        required: false
+        type: DataTypes.FLOAT
     },
     combustible: {
-        type: String,
-        required: [true, 'El combustible es necesario']
+        type: DataTypes.ENUM(['Diesel', 'Gasolina'])
     },
     ruedas: {
-        type: Number,
-        required: [true, 'El número de ruedas es necesario']
+        type: DataTypes.INTEGER
     },
     motor: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
     },
     turbo: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
     },
     chasis: {
-        type: String,
-        required: [true, 'El chasis es necesario']
+        type: DataTypes.STRING
     },
     serie: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
     },
     color: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
+    },
+    numeroDeAyudantes: {
+        type: DataTypes.INTEGER
+    },
+    capacidadCombustible: {
+        type: DataTypes.FLOAT
+    },
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
+}, {
+    sequelize: sql,
+    modelName: 'Vehiculos',
+    timestamps: false
 });
 
-// ===============================================
-// Validar el tipo de vehiculo y el servicio que presta
-// ===============================================
-Vehiculo.plugin(uniqueValidator, {
-    message: '{PATH} debe ser único'
+Vehiculo.belongsTo(CodigoTipoDeVehiculo, {
+    foreignKey: 'codTipoDeVehiculo'
 });
 
+Vehiculo.belongsTo(Proyecto, {
+    foreignKey: 'proyecto'
+});
+
+Vehiculo.belongsTo(MotivosDePago, {
+    foreignKey: 'pagos'
+});
 
 // ===============================================
 // Export Usuario model
 // ===============================================
-module.exports = mongoose.model('Vehiculo', Vehiculo);
+module.exports = {
+    Vehiculo,
+    CodigoTipoDeVehiculo
+}

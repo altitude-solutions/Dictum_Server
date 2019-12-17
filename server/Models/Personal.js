@@ -70,7 +70,8 @@ Personal.init({
 }, {
     sequelize: sql,
     modelName: 'Personal',
-    timestamps: false
+    timestamps: false,
+    tableName: 'Personal'
 });
 
 Personal.belongsTo(Proyecto, {
@@ -80,6 +81,7 @@ Personal.belongsTo(Proyecto, {
 Personal.belongsTo(Personal, {
     foreignKey: 'superior'
 });
+
 
 // ===============================================
 // Export Personal model

@@ -17,9 +17,304 @@ const { verifyToken } = require('../middlewares/authentication');
 // ===============================================
 // Vehicule's related Models
 // ===============================================
-const { CodigoTipoDeVehiculo, Vehiculo } = require('../Models/Vehicle');
-const { Proyecto } = require('../Models/Proyectos');
+const { CodigoTipoDeVehiculo, Vehiculo, TipoDeVehiculo } = require('../Models/Vehicle');
+const { MotivosDePago } = require('../Models/Pagos');
+// ===============================================
+// Create TipoDeVehiculo
+// ===============================================
+app.post('/tipo_de_vehiculo', verifyToken, (req, res) => {
+    let body = req.body;
+    let user = req.user;
+    if (user.permisos.includes('ve_escribir')) {
+        if (body.tipo) {
+            // save type to db
+            TipoDeVehiculo.create(body).then(tipoDb => {
+                res.json({
+                    tipoDeVehiculo: tipoDb
+                });
+            }).catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'El tipo de vehículo es necesario'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
 
+// ===============================================
+// Get tipo de vehiculo by id
+// ===============================================
+app.get('/tipo_de_vehiculo/:id', verifyToken, (req, res) => {
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('ve_leer')) {
+        TipoDeVehiculo.findByPk(id)
+            .then(tipoDb => {
+                if (!tipoDb) {
+                    return res.status(404).json({
+                        err: {
+                            message: 'Tipo de vehículo no encontrado'
+                        }
+                    });
+                }
+                res.json({
+                    tipoDeVehiculo: tipoDb
+                });
+            }).catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get a paginated list of tipos de vehiculo
+// default from 0 to 15
+// ===============================================
+app.get('/tipo_de_vehiculo', verifyToken, (req, res) => {
+    let from = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 15;
+    let user = req.user;
+    if (user.permisos.includes('ve_leer')) {
+        TipoDeVehiculo.count({})
+            .then(count => {
+                TipoDeVehiculo.findAll({
+                    offset: from,
+                    limit
+                }).then(tiposDb => {
+                    res.json({
+                        tiposDeVehiculo: tiposDb,
+                        count
+                    });
+                });
+            }).catch(err => {
+                res.status(500).json({
+                    err
+                });
+            });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// update tipo de vehiculo
+// ===============================================
+app.put('/tipo_de_vehiculo/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['tipo', 'estado']);
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('ve_modificar')) {
+        // Undefined instead of delete method, interesting
+        if (body.tipo || body.estado != undefined) {
+            TipoDeVehiculo.update(body, {
+                where: {
+                    id
+                }
+            }).then(affected => {
+                res.json({
+                    affected
+                });
+            }).catch(err => {
+                res.status(500).json({
+                    err
+                });
+            });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'No hay nada que modificar'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// TODO: DELETE tipo de vehiculo
+
+// ===============================================
+// Create CodigoTipoDeVehiculo
+// ===============================================
+app.post('/cod_tipo', verifyToken, (req, res) => {
+    let body = req.body;
+    let user = req.user;
+    if (user.permisos.includes('ve_escribir')) {
+        if (body.tipo && body.codigo) {
+            TipoDeVehiculo.findByPk(body.tipo)
+                .then(tipo => {
+                    // Check if referenced type exists
+                    if (!tipo) {
+                        return res.status(404).json({
+                            err: {
+                                message: 'Tipo de vehículo no encontrado'
+                            }
+                        });
+                    }
+                    // Save cod to db
+                    CodigoTipoDeVehiculo.create(body).then(codTipoDb => {
+                        res.json({
+                            codTipoDeVehiculo: codTipoDb
+                        });
+                    }).catch(err => {
+                        return res.status(500).json({
+                            err
+                        });
+                    });
+                }).catch(err => {
+                    return res.status(500).json({
+                        err
+                    });
+                });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'El código de tipo de vehículo y el tipo de vehiculo es necesario'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get codigo tipo de vehiculo by id
+// ===============================================
+app.get('/cod_tipo/:id', verifyToken, (req, res) => {
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('ve_leer')) {
+        CodigoTipoDeVehiculo.findByPk(id)
+            .then(codTipoDb => {
+                if (!codTipoDb) {
+                    return res.status(404).json({
+                        err: {
+                            message: 'Código tipo de vehículo no encontrado'
+                        }
+                    });
+                }
+                res.json({
+                    codTipoDeVehiculo: codTipoDb
+                });
+            }).catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get a paginated list of tipos de vehiculo
+// default from 0 to 15
+// ===============================================
+app.get('/cod_tipo', verifyToken, (req, res) => {
+    let from = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 15;
+    let user = req.user;
+    if (user.permisos.includes('ve_leer')) {
+        CodigoTipoDeVehiculo.count({})
+            .then(count => {
+                CodigoTipoDeVehiculo.findAll({
+                    offset: from,
+                    limit
+                }).then(codTipoDb => {
+                    res.json({
+                        codTiposDeVehiculo: codTipoDb,
+                        count
+                    });
+                });
+            }).catch(err => {
+                res.status(500).json({
+                    err
+                });
+            });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// update codigo tipo de vehiculo
+// ===============================================
+app.put('/cod_tipo/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['tipo', 'codigo', 'estado']);
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('ve_modificar')) {
+        if (body.tipo || body.codigo || body.estado != undefined) {
+            CodigoTipoDeVehiculo.update(body, {
+                where: {
+                    id
+                }
+            }).then(affected => {
+                res.json({
+                    affected
+                });
+            }).catch(err => {
+                res.status(500).json({
+                    err
+                });
+            });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'No hay nada que modificar'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+// TODO: Delete codigos tipo de vehiculo
 
 // ===============================================
 // Create vehicle
@@ -28,14 +323,21 @@ app.post('/vehi', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('ve_escribir')) {
-        if (body.movil && body.placa && body.tipoDeVehiculo && body.marca && body.modelo && body.anio) {
-            res.json({
-                ok: true
-            });
+        if (body.movil && body.placa) {
+            Vehiculo.create(body)
+                .then(vehicleDB => {
+                    res.json({
+                        vehiculo: vehicleDB
+                    });
+                }).catch(err => {
+                    res.status(500).json({
+                        err
+                    });
+                });
         } else {
             res.status(400).json({
                 err: {
-                    message: "El número de móvil, placa, tipo de vehículo, marca, modelo y año son necesarios"
+                    message: "El número de móvil y la placa son necesarios"
                 }
             });
         }
@@ -55,45 +357,27 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        let arg = {
-            searchParams: [
-                ['movil', id]
-            ]
-        };
-        if (Object.keys(req.query).length > 0) {
-            Object.entries(req.query).forEach(element => {
-                if (element[0] == 'fields') {
-                    element[1] = JSON.parse(element[1]);
+        Vehiculo.findByPk(id)
+            .then(vehicleDb => {
+                if (!vehicleDb) {
+                    return res.status(404).json({
+                        err: {
+                            message: 'Vehículo no encontrado'
+                        }
+                    });
                 }
-                arg[`${element[0]}`] = element[1];
-            });
-        }
-        let bodyContent = {
-            keys: Object.keys(arg),
-            values: Object.values(arg)
-        };
-        let query = sqlBuilder('select', 'Vehiculos', bodyContent);
-        db.query(query, 'Vehiculos', (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
+                res.json({
+                    vehiculo: vehicleDb
+                });
+            }).catch(err => {
+                res.status(500).json({
                     err
                 });
-            }
-            if (!results[0]) {
-                return res.status(404).json({
-                    err: {
-                        message: 'Vehículo no encontrado'
-                    }
-                });
-            }
-            res.json({
-                results: results[0]
             });
-        });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar vehículos'
+                message: 'Acceso denegado'
             }
         });
     }
@@ -109,48 +393,29 @@ app.get('/vehi', verifyToken, (req, res) => {
     let limit = Number(req.query.to) || 15;
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        let body = _.pick(req.body, ['movil', 'placa', 'tipoDeVehiculo', 'servicios', 'codTipoDeVehiculo', 'descripcion',
-            'cargaToneladas', 'cargaMetrocCubicos', 'cargaCombustible', 'marca', 'modelo',
-            'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
-            'motor', 'turbo', 'chasis', 'serie', 'color', 'conductor', 'conductor_2', 'numeroDeAyudantes'
-        ]);
-        let arg = {
-            bounds: [from, limit]
-        };
-        if (Object.entries(body).length > 0) {
-            arg.searchParams = Object.entries(body);
-        }
-        if (Object.keys(req.query).length > 0) {
-            Object.entries(req.query).forEach(element => {
-                if (element[0] == 'fields') {
-                    element[1] = JSON.parse(element[1]);
-                }
-                arg[`${element[0]}`] = element[1];
-            });
-        }
-        let bodyContent = {
-            keys: Object.keys(arg),
-            values: Object.values(arg)
-        };
-        let query = sqlBuilder('select', 'Vehiculos', bodyContent);
-        db.query(query, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
+        Vehiculo.count({})
+            .then(count => {
+                Vehiculo.findAll({
+                    offset: from,
+                    limit
+                }).then(vehiculos => {
+                    res.json({
+                        vehiculos
+                    });
+                }).catch(err => {
+                    res.status(500).json({
+                        err
+                    });
+                });
+            }).catch(err => {
+                res.status(500).json({
                     err
                 });
-            }
-            db.query('select count(*) from Vehiculos;', (err, counts, fields) => {
-                res.json({
-                    results,
-                    count: Number(counts[0]['count(*)']),
-                    requestValue: "Lista de Vehiculos",
-                });
             });
-        });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar vehículos'
+                message: 'Acceso denegado'
             }
         });
     }
@@ -160,47 +425,26 @@ app.get('/vehi', verifyToken, (req, res) => {
 // Update vehicle
 // ===============================================
 app.put('/vehi/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['movil', 'placa', 'tipoDeVehiculo', 'servicio', 'codTipoDeVehiculo', 'descripcion',
-        'cargaToneladas', 'cargaMetrocCubicos', 'cargaCombustible', 'marca', 'modelo',
-        'version', 'anio', 'cilindrada', 'traccion', 'peso', 'combustible', 'ruedas',
-        'motor', 'turbo', 'chasis', 'serie', 'color', 'conductor', 'conductor_2', 'numeroDeAyudantes'
-    ]);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        let arg = {
-            searchParams: [
-                ['movil', id]
-            ]
-        }
-        if (Object.entries(body).length > 0) {
-            arg.fields = body;
-            let bodyContent = {
-                keys: Object.keys(arg),
-                values: Object.values(arg)
-            };
-            let query = sqlBuilder('update', 'Vehiculos', bodyContent);
-            db.query(query, (err, results, fields) => {
-                if (err) {
-                    return res.status(500).json({
-                        err
-                    });
-                }
-                res.json({
-                    results
-                });
+        Vehiculo.update(body, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
             });
-        } else {
-            return res.status(400).json({
-                err: {
-                    message: 'Nada que actualizar'
-                }
+        }).catch(err => {
+            res.status(500).json({
+                err
             });
-        }
+        });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar vehículos'
+                message: 'Acceso denegado'
             }
         });
     }
@@ -213,36 +457,203 @@ app.delete('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ve_borrar')) {
-        let arg = {
-            searchParams: [
-                ['movil', id]
-            ]
-        }
-        let bodyContent = {
-            keys: Object.keys(arg),
-            values: Object.values(arg)
-        };
-        let query = sqlBuilder('delete', 'Vehiculos', bodyContent);
-        db.query(query, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
+        Vehiculo.update({
+            estado: false
+        }, {
+            where: {
+                id
             }
+        }).then(affected => {
             res.json({
-                results
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
             });
         });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para borrar vehículos'
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+
+// ===============================================
+// Create MotivosDePago
+// ===============================================
+app.post('/motivos_de_pago', verifyToken, (req, res) => {
+    let body = req.body;
+    let user = req.user;
+    if (user.permisos.includes('pro_escribir')) {
+        if (body.motivo) {
+            // save type to db
+            MotivosDePago.create(body).then(motivoDB => {
+                res.json({
+                    motivo: motivoDB
+                });
+            }).catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'El motivo de pago es necesario'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
             }
         });
     }
 });
 
 // ===============================================
-// Export routes
+// Get Proyecto by id
+// ===============================================
+app.get('/motivos_de_pago/:id', verifyToken, (req, res) => {
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('pro_leer')) {
+        MotivosDePago.findByPk(id)
+            .then(motivoDB => {
+                if (!motivoDB) {
+                    return res.status(404).json({
+                        err: {
+                            message: 'Motivo de pago no encontrado'
+                        }
+                    });
+                }
+                res.json({
+                    motivo: motivoDB
+                });
+            }).catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get a paginated list of Proyectos
+// default from 0 to 15
+// ===============================================
+app.get('/motivos_de_pago', verifyToken, (req, res) => {
+    let from = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 15;
+    let user = req.user;
+    if (user.permisos.includes('pro_leer')) {
+        MotivosDePago.count({})
+            .then(count => {
+                MotivosDePago.findAll({
+                    offset: from,
+                    limit
+                }).then(motivosDB => {
+                    res.json({
+                        motivos: motivosDB,
+                        count
+                    });
+                });
+            }).catch(err => {
+                res.status(500).json({
+                    err
+                });
+            });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// update Proyecto
+// ===============================================
+app.put('/motivos_de_pago/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['proyecto']);
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('pro_modificar')) {
+        if (!body.motivo) {
+            return res.status(400).json({
+                err: {
+                    message: 'No hay nada que modificar'
+                }
+            });
+        }
+        MotivosDePago.update(body, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Delete proyecto
+// ===============================================
+app.delete('/motivos_de_pago/:id', verifyToken, (req, res) => {
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('pro_borrar')) {
+        MotivosDePago.update({
+            estado: false
+        }, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+
+
+// ===============================================
+// Export vehicles
 // ===============================================
 module.exports = app;

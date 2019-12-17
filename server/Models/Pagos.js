@@ -29,7 +29,8 @@ MotivosDePago.init({
 }, {
     sequelize: sql,
     modelName: 'MotivosDePago',
-    timestamps: false
+    timestamps: false,
+    tableName: 'MotivosDePago'
 });
 
 // ===============================================

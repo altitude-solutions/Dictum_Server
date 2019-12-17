@@ -29,7 +29,8 @@ Proyecto.init({
 }, {
     sequelize: sql,
     modelName: 'Proyectos',
-    timestamps: false
+    timestamps: false,
+    tableName: 'Proyectos'
 });
 
 // ===============================================

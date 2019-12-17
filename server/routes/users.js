@@ -61,6 +61,7 @@ app.post('/users', (req, res) => {
                                 Usuario.findByPk(DBuser.get('nombreUsuario'), {
                                     attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo']
                                 }).then(returnUser => {
+                                    returnUser.permisos = construirPermisos(returnUser.permisos);
                                     return res.json({
                                         user: returnUser
                                     });
@@ -86,11 +87,12 @@ app.post('/users', (req, res) => {
                 });
             } else {
                 // There are no users then create root, Override permisos to create root user
-                body.permisos = '1111 1111 1111 1111 1111 1111 1111 1111';
+                body.permisos = '1111 1111 1111 1111 1111 1111 1111 1111 1111';
                 Usuario.create(body).then(DBuser => {
                     Usuario.findByPk(DBuser.get('nombreUsuario'), {
                         attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo']
                     }).then(returnUser => {
+                        returnUser.permisos = construirPermisos(returnUser.permisos);
                         return res.json({
                             user: returnUser
                         });
@@ -124,7 +126,7 @@ app.get('/users/:id', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('u_leer')) {
         Usuario.findByPk(id, {
-            attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo']
+            attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo', 'estado']
         }).then(dbUser => {
             if (!dbUser) {
                 return res.status(404).json({
@@ -165,14 +167,21 @@ app.get('/users/:id', verifyToken, (req, res) => {
 app.get('/users', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
+    let where = {};
+    if (req.query.status) {
+        let status = Number(req.query.status);
+        where.estado = status == 1 ? true : false;
+    }
+
     let user = req.user;
     if (user.permisos.includes('u_leer')) {
         Usuario.count({})
             .then(count => {
                 Usuario.findAll({
-                    attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo'],
+                    attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'empresa', 'correo', 'estado'],
                     offset: from,
-                    limit
+                    limit,
+                    where
                 }).then(users => {
                     for (let i = 0; i < users.length; i++) {
                         users[i].permisos = construirPermisos(users[i].permisos);
@@ -205,7 +214,7 @@ app.get('/users', verifyToken, (req, res) => {
 // Update user
 // ===============================================
 app.put('/users/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['permisos', 'contra', 'empresa', 'recuperacion', 'correo', 'nombreReal']);
+    let body = _.pick(req.body, ['permisos', 'contra', 'empresa', 'recuperacion', 'correo', 'nombreReal', 'estado']);
     let id = req.params.id;
     let user = req.user;
 

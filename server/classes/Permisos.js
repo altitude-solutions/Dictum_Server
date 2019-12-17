@@ -18,7 +18,8 @@ let permisosValidos = [
     'p_leer', 'p_escribir', 'p_borrar', 'p_modificar', // personal
     've_leer', 've_escribir', 've_borrar', 've_modificar', // vehículos
     'io_leer', 'io_escribir', 'io_borrar', 'io_modificar', // Entradas y salidas
-    'fin_leer', 'fin_escribir', 'fin_borrar', 'fin_modificar' // Finanzas
+    'fin_leer', 'fin_escribir', 'fin_borrar', 'fin_modificar', // Finanzas
+    'pro_leer', 'pro_escribir', 'pro_borrar', 'pro_modificar' // Proyectos
 ];
 
 let construirPermisos = (permi) => {

@@ -16,6 +16,31 @@ const { Proyecto } = require('./Proyectos');
 const { MotivosDePago } = require('./Pagos');
 
 
+// ===============================================
+// CodigoTipoDeVehiculo
+// ===============================================
+class TipoDeVehiculo extends Model {};
+TipoDeVehiculo.init({
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    tipo: {
+        type: DataTypes.STRING,
+        unique: true
+    },
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+}, {
+    sequelize: sql,
+    modelName: 'TiposDeVehiculo',
+    tableName: 'TiposDeVehiculo',
+    timestamps: false
+});
 
 // ===============================================
 // CodigoTipoDeVehiculo
@@ -29,14 +54,22 @@ CodigoTipoDeVehiculo.init({
         autoIncrement: true
     },
     codigo: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        unique: true
     },
-    tipo: {
-        type: DataTypes.INTEGER
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
 }, {
     sequelize: sql,
-    modelName: 'CodigosTiposDeVehiculo'
+    modelName: 'CodigosTiposDeVehiculo',
+    tableName: 'CodigosTiposDeVehiculo',
+    timestamps: false
+});
+
+CodigoTipoDeVehiculo.belongsTo(TipoDeVehiculo, {
+    foreignKey: 'tipo'
 });
 
 // ===============================================
@@ -51,7 +84,8 @@ Vehiculo.init({
     },
     placa: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     descripcion: {
         type: DataTypes.STRING
@@ -120,7 +154,8 @@ Vehiculo.init({
 }, {
     sequelize: sql,
     modelName: 'Vehiculos',
-    timestamps: false
+    timestamps: false,
+    tableName: 'Vehiculos'
 });
 
 Vehiculo.belongsTo(CodigoTipoDeVehiculo, {
@@ -140,5 +175,6 @@ Vehiculo.belongsTo(MotivosDePago, {
 // ===============================================
 module.exports = {
     Vehiculo,
-    CodigoTipoDeVehiculo
+    CodigoTipoDeVehiculo,
+    TipoDeVehiculo
 }

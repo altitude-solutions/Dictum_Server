@@ -15,10 +15,12 @@ const _ = require('underscore');
 const { verifyToken } = require('../middlewares/authentication');
 
 // ===============================================
-// Vehicule's related Models
+// Vehiculos' related Models
 // ===============================================
 const { CodigoTipoDeVehiculo, Vehiculo, TipoDeVehiculo } = require('../Models/Vehicle');
 const { MotivosDePago } = require('../Models/Pagos');
+const { Proyecto } = require('../Models/Proyectos');
+
 // ===============================================
 // Create TipoDeVehiculo
 // ===============================================
@@ -93,24 +95,26 @@ app.get('/tipo_de_vehiculo/:id', verifyToken, (req, res) => {
 app.get('/tipo_de_vehiculo', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
+    let where = {};
+    if (req.query.status) {
+        where.estado = Number(req.query.status) == 1 ? true : false;
+    }
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        TipoDeVehiculo.count({})
-            .then(count => {
-                TipoDeVehiculo.findAll({
-                    offset: from,
-                    limit
-                }).then(tiposDb => {
-                    res.json({
-                        tiposDeVehiculo: tiposDb,
-                        count
-                    });
-                });
-            }).catch(err => {
-                res.status(500).json({
-                    err
-                });
+        TipoDeVehiculo.findAndCountAll({
+            offset: from,
+            limit,
+            where
+        }).then(reply => {
+            res.json({
+                tiposDeVehiculo: reply.rows,
+                count: reply.count
             });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -217,23 +221,26 @@ app.get('/cod_tipo/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        CodigoTipoDeVehiculo.findByPk(id)
-            .then(codTipoDb => {
-                if (!codTipoDb) {
-                    return res.status(404).json({
-                        err: {
-                            message: 'Código tipo de vehículo no encontrado'
-                        }
-                    });
-                }
-                res.json({
-                    codTipoDeVehiculo: codTipoDb
+        CodigoTipoDeVehiculo.findByPk(id, {
+            include: [{
+                model: TipoDeVehiculo
+            }]
+        }).then(codTipoDb => {
+            if (!codTipoDb) {
+                return res.status(404).json({
+                    err: {
+                        message: 'Código tipo de vehículo no encontrado'
+                    }
                 });
-            }).catch(err => {
-                return res.status(500).json({
-                    err
-                });
+            }
+            res.json({
+                codTipoDeVehiculo: codTipoDb
             });
+        }).catch(err => {
+            return res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -250,24 +257,29 @@ app.get('/cod_tipo/:id', verifyToken, (req, res) => {
 app.get('/cod_tipo', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
+    let where = {};
+    if (req.query.status) {
+        where.estado = Number(req.query.status) == 1 ? true : false;
+    }
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        CodigoTipoDeVehiculo.count({})
-            .then(count => {
-                CodigoTipoDeVehiculo.findAll({
-                    offset: from,
-                    limit
-                }).then(codTipoDb => {
-                    res.json({
-                        codTiposDeVehiculo: codTipoDb,
-                        count
-                    });
-                });
-            }).catch(err => {
-                res.status(500).json({
-                    err
-                });
+        CodigoTipoDeVehiculo.findAndCountAll({
+            offset: from,
+            limit,
+            where,
+            include: [{
+                model: TipoDeVehiculo
+            }]
+        }).then(reply => {
+            res.json({
+                codTiposDeVehiculo: reply.rows,
+                count: reply.count
             });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -352,28 +364,39 @@ app.post('/vehi', verifyToken, (req, res) => {
 
 // ===============================================
 // Read vehi by id
+// TODO: Populate Rutas, Servicios and Conductores
 // ===============================================
 app.get('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        Vehiculo.findByPk(id)
-            .then(vehicleDb => {
-                if (!vehicleDb) {
-                    return res.status(404).json({
-                        err: {
-                            message: 'Vehículo no encontrado'
-                        }
-                    });
+        Vehiculo.findByPk(id, {
+            include: [{
+                    model: MotivosDePago
+                },
+                {
+                    model: Proyecto
+                },
+                {
+                    model: CodigoTipoDeVehiculo
                 }
-                res.json({
-                    vehiculo: vehicleDb
+            ]
+        }).then(vehicleDb => {
+            if (!vehicleDb) {
+                return res.status(404).json({
+                    err: {
+                        message: 'Vehículo no encontrado'
+                    }
                 });
-            }).catch(err => {
-                res.status(500).json({
-                    err
-                });
+            }
+            res.json({
+                vehiculo: vehicleDb
             });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -391,27 +414,37 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
 app.get('/vehi', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
+    let where = {};
+    if (req.query.status) {
+        let status = Number(req.query.status);
+        where.estado = status == 1 ? true : false;
+    }
     let user = req.user;
     if (user.permisos.includes('ve_leer')) {
-        Vehiculo.count({})
-            .then(count => {
-                Vehiculo.findAll({
-                    offset: from,
-                    limit
-                }).then(vehiculos => {
-                    res.json({
-                        vehiculos
-                    });
-                }).catch(err => {
-                    res.status(500).json({
-                        err
-                    });
-                });
-            }).catch(err => {
-                res.status(500).json({
-                    err
-                });
+        Vehiculo.findAndCountAll({
+            offset: from,
+            limit,
+            where,
+            include: [{
+                    model: MotivosDePago
+                },
+                {
+                    model: Proyecto
+                },
+                {
+                    model: CodigoTipoDeVehiculo
+                }
+            ]
+        }).then(reply => {
+            res.json({
+                vehiculos: reply.rows,
+                count: reply.count
             });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -427,10 +460,11 @@ app.get('/vehi', verifyToken, (req, res) => {
 app.put('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
-    if (user.permisos.includes('ve_leer')) {
+    let body = req.body;
+    if (user.permisos.includes('ve_modificar')) {
         Vehiculo.update(body, {
             where: {
-                id
+                movil: id
             }
         }).then(affected => {
             res.json({
@@ -461,7 +495,7 @@ app.delete('/vehi/:id', verifyToken, (req, res) => {
             estado: false
         }, {
             where: {
-                id
+                movil: id
             }
         }).then(affected => {
             res.json({
@@ -490,7 +524,7 @@ app.post('/motivos_de_pago', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('pro_escribir')) {
         if (body.motivo) {
-            // save type to db
+            // save reason to db
             MotivosDePago.create(body).then(motivoDB => {
                 res.json({
                     motivo: motivoDB
@@ -556,24 +590,27 @@ app.get('/motivos_de_pago/:id', verifyToken, (req, res) => {
 app.get('/motivos_de_pago', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
+    let where = {};
+    if (req.query.status) {
+        let status = Number(req.query.status);
+        where.estado = status == 1 ? true : false;
+    }
     let user = req.user;
     if (user.permisos.includes('pro_leer')) {
-        MotivosDePago.count({})
-            .then(count => {
-                MotivosDePago.findAll({
-                    offset: from,
-                    limit
-                }).then(motivosDB => {
-                    res.json({
-                        motivos: motivosDB,
-                        count
-                    });
-                });
-            }).catch(err => {
-                res.status(500).json({
-                    err
-                });
+        MotivosDePago.findAndCountAll({
+            offset: from,
+            limit,
+            where
+        }).then(reply => {
+            res.json({
+                motivos: reply.rows,
+                count: reply.count
             });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -587,17 +624,10 @@ app.get('/motivos_de_pago', verifyToken, (req, res) => {
 // update Proyecto
 // ===============================================
 app.put('/motivos_de_pago/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['proyecto']);
+    let body = _.pick(req.body, ['proyecto', 'estado']);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('pro_modificar')) {
-        if (!body.motivo) {
-            return res.status(400).json({
-                err: {
-                    message: 'No hay nada que modificar'
-                }
-            });
-        }
         MotivosDePago.update(body, {
             where: {
                 id

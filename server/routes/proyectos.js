@@ -39,7 +39,7 @@ app.post('/proyecto', verifyToken, (req, res) => {
                 });
             });
         } else {
-            res.statust(400).json({
+            res.status(400).json({
                 err: {
                     message: 'El nombre del proyecto es necesario'
                 }
@@ -125,30 +125,31 @@ app.get('/proyecto', verifyToken, (req, res) => {
 // update Proyecto
 // ===============================================
 app.put('/proyecto/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['proyecto']);
+    let body = _.pick(req.body, ['proyecto', 'estado']);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('pro_modificar')) {
-        if (!body.proyecto) {
-            return res.status(400).json({
+        if (body.proyecto || body.estado != undefined) {
+            Proyecto.update(body, {
+                where: {
+                    id
+                }
+            }).then(affected => {
+                res.json({
+                    affected
+                });
+            }).catch(err => {
+                res.status(500).json({
+                    err
+                });
+            });
+        } else {
+            res.status(400).json({
                 err: {
                     message: 'No hay nada que modificar'
                 }
             });
         }
-        Proyecto.update(body, {
-            where: {
-                id
-            }
-        }).then(affected => {
-            res.json({
-                affected
-            });
-        }).catch(err => {
-            res.status(500).json({
-                err
-            });
-        });
     } else {
         res.status(403).json({
             err: {

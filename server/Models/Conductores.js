@@ -51,4 +51,4 @@ Conductor.belongsTo(Vehiculo, {
 // ===============================================
 module.exports = {
     Conductor
-}
+};

@@ -219,13 +219,6 @@ app.put('/users/:id', verifyToken, (req, res) => {
     let user = req.user;
 
     if (user.permisos.includes('u_modificar')) {
-        if (body && !user.permisos.includes('u_leer')) {
-            return res.status(403).json({
-                err: {
-                    message: 'Acceso denegado'
-                }
-            });
-        }
         if (body.contra) {
             body.contra = bcrypt.hashSync(body.contra, 10);
         }

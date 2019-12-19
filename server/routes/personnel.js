@@ -191,6 +191,7 @@ app.delete('/personnel/:id', verifyToken, (req, res) => {
     }
 });
 
+// TODO: supervisores
 
 // ===============================================
 // Export routes

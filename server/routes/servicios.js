@@ -17,6 +17,7 @@ const _ = require('underscore');
 // Servicios' related Models
 // ===============================================
 const { Servicio, VehiculosServicios } = require('../Models/Servicios');
+const { Vehiculo } = require('../Models/Vehicle');
 
 // ===============================================
 // Middlewares
@@ -95,11 +96,11 @@ app.get('/servicios/:id', verifyToken, (req, res) => {
 // default from 0 to 15
 // ===============================================
 app.get('/servicios', verifyToken, (req, res) => {
-    let offset = req.query.from;
-    let limit = req.query.to;
+    let offset = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 15;
     let where = {};
     if (req.query.status) {
-        let status = Number(req.query.status)
+        let status = Number(req.query.status) == 1 ? true : false;
         where.estado = status
     }
     let user = req.user;
@@ -133,6 +134,7 @@ app.get('/servicios', verifyToken, (req, res) => {
 app.put('/servicios/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
+    let body = req.body;
     if (user.permisos.includes('pro_modificar')) {
         Servicio.update(body, {
             where: {
@@ -194,7 +196,24 @@ app.post('/vehiculo_servicio', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('pro_escribir')) {
-
+        if (body.movil && body.servicio) {
+            VehiculosServicios.create(body)
+                .then(vehiculoServicio => {
+                    res.json({
+                        vehiculoServicio
+                    });
+                }).catch(err => {
+                    res.status(500).json({
+                        err
+                    });
+                });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'El vehiculo y el servicio son necesarios'
+                }
+            });
+        }
     } else {
         res.status(403).json({
             err: {
@@ -211,7 +230,30 @@ app.get('/vehiculo_servicio/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('pro_leer')) {
-
+        VehiculosServicios.findByPk(id, {
+            include: [{
+                    model: Servicio
+                },
+                {
+                    model: Vehiculo
+                }
+            ]
+        }).then(vehiculoServicio => {
+            if (!vehiculoServicio) {
+                return res.status(404).json({
+                    err: {
+                        message: 'No encontrado'
+                    }
+                });
+            }
+            res.json({
+                vehiculoServicio
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -226,16 +268,36 @@ app.get('/vehiculo_servicio/:id', verifyToken, (req, res) => {
 // default from 0 to 15
 // ===============================================
 app.get('/vehiculo_servicio', verifyToken, (req, res) => {
-    let offset = req.query.from;
-    let limit = req.query.to;
+    let offset = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 15;
     let where = {};
     if (req.query.status) {
-        let status = Number(req.query.status)
+        let status = Number(req.query.status) == 1 ? true : false;
         where.estado = status
     }
     let user = req.user;
     if (user.permisos.includes('pro_leer')) {
-
+        VehiculosServicios.findAndCountAll({
+            offset,
+            limit,
+            where,
+            include: [{
+                    model: Servicio
+                },
+                {
+                    model: Vehiculo
+                }
+            ]
+        }).then(reply => {
+            res.json({
+                vehiculosServicio: reply.rows,
+                count: reply.count
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        })
     } else {
         res.status(403).json({
             err: {
@@ -250,10 +312,22 @@ app.get('/vehiculo_servicio', verifyToken, (req, res) => {
 // ===============================================
 app.put('/vehiculo_servicio/:id', verifyToken, (req, res) => {
     let id = req.params.id;
+    let body = req.body;
     let user = req.user;
-
     if (user.permisos.includes('pro_modificar')) {
-
+        VehiculosServicios.update(body, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {
@@ -271,7 +345,21 @@ app.delete('/vehiculo_servicio/:id', verifyToken, (req, res) => {
     let user = req.user;
 
     if (user.permisos.includes('pro_borrar')) {
-
+        VehiculosServicios.update({
+            estado: false
+        }, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
     } else {
         res.status(403).json({
             err: {

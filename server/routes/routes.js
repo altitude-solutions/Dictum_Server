@@ -14,33 +14,33 @@ const _ = require('underscore');
 // Middlewares
 // ===============================================
 const { verifyToken } = require('../middlewares/authentication');
-const { sqlBuilder } = require('../classes/SQLBuilder');
-
-let db = process.dbConnection;
 
 // ===============================================
-// Create user
+// Rutas' related models
 // ===============================================
-app.post('/route', verifyToken, (req, res) => {
+const { Ruta, VehiculosRutas } = require('../Models/Ruta');
+const { TipoDeVehiculo, Vehiculo } = require('../Models/Vehicle');
+const { Servicio } = require('../Models/Servicios');
+
+
+// ===============================================
+// Create ruta
+// ===============================================
+app.post('/ruta', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('ru_escribir')) {
         if (body.ruta && body.servicio && body.tipoDeVehiculos) {
-            let bodyContent = {
-                keys: Object.keys(body),
-                values: Object.values(body)
-            };
-            let query = sqlBuilder('insert', 'Rutas', bodyContent);
-            db.query(query, (err, results, fields) => {
-                if (err) {
-                    return res.status(500).json({
+            Ruta.create(body)
+                .then(rutaDB => {
+                    res.json({
+                        ruta: rutaDB
+                    });
+                }).catch(err => {
+                    res.status(500).json({
                         err
                     });
-                }
-                res.json({
-                    results
-                });
-            });
+                })
         } else {
             res.status(400).json({
                 err: {
@@ -51,186 +51,326 @@ app.post('/route', verifyToken, (req, res) => {
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para crear rutas'
+                message: 'Acceso denegado'
             }
         });
     }
 });
 
 // ===============================================
-// Read user by id
+// get ruta by id
 // ===============================================
-app.get('/route/:id', verifyToken, (req, res) => {
+app.get('/ruta/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ru_leer')) {
-        let arg = {
-            searchParams: [
-                ['ruta', id]
-            ]
-        };
-        if (Object.keys(req.query).length > 0) {
-            Object.entries(req.query).forEach(element => {
-                if (element[0] == 'fields') {
-                    element[1] = JSON.parse(element[1]);
-                }
-                arg[`${element[0]}`] = element[1];
-            });
-        }
-        let queryContent = {
-            keys: Object.keys(arg),
-            values: Object.values(arg)
-        };
-        let query = sqlBuilder('select', 'Rutas', queryContent);
-        db.query(query, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
+        Ruta.findByPk(id, {
+            include: [{
+                model: TipoDeVehiculo
+            }, {
+                model: Servicio
+            }]
+        }).then(rutaDB => {
+            if (!rutaDB) {
+                return res.status(404).json({
+                    err: {
+                        message: 'No encontrado'
+                    }
                 });
             }
             res.json({
-                results: results[0]
+                ruta: rutaDB
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
             });
         });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar rutas'
+                message: 'Acceso denegado'
             }
         });
     }
 });
 
 // ===============================================
-// Get users
+// Get rutas
 // Optional pagination
-// Default 15 users from 0
+// Default 15 rutas from 0
 // ===============================================
-app.get('/route', verifyToken, (req, res) => {
-    let from = Number(req.query.from) || 0;
+app.get('/ruta', verifyToken, (req, res) => {
+    let offset = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 15;
+    let where = {};
+    if (req.query.status) {
+        let status = Number(req.query.status);
+        where.estado = status == 1 ? true : false;
+    }
     let user = req.user;
     if (user.permisos.includes('ru_leer')) {
-        let body = _.pick(req.body, ['ruta', 'servicio', 'tipoDeVehiculos', 'referencia', 'vehiculo', 'zona', 'turno', 'numeroDeRuta', 'frecuencia', 'POA']);
-        let arg = {
-            bounds: [from, limit]
-        };
-        if (Object.entries(body).length > 0) {
-            arg.searchParams = Object.entries(body);
-        }
-        if (Object.keys(req.query).length > 0) {
-            Object.entries(req.query).forEach(element => {
-                if (element[0] == 'fields') {
-                    element[1] = JSON.parse(element[1]);
-                }
-                arg[`${element[0]}`] = element[1];
+        Ruta.findAndCountAll({
+            offset,
+            limit,
+            where,
+            include: [{
+                model: TipoDeVehiculo
+            }, {
+                model: Servicio
+            }]
+        }).then(reply => {
+            res.json({
+                rutas: reply.rows,
+                count: reply.count
             });
-        }
-        let queryContent = {
-            keys: Object.keys(arg),
-            values: Object.values(arg)
-        };
-        let query = sqlBuilder('select', 'Rutas', queryContent);
-        db.query(query, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
-            }
-            db.query('select count(*) from Rutas;', (err, counts, fie) => {
-                res.json({
-                    results,
-                    count: Number(counts[0]['count(*)'])
-                        // count: Number(counts[0][fields[0].name])
-                });
+        }).catch(err => {
+            res.status(500).json({
+                err
             });
         });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para observar rutas'
+                message: 'Acceso denegado'
             }
         });
     }
 });
 
 // ===============================================
-// Update user
+// Update ruta
 // ===============================================
-app.put('/route/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['ruta', 'servicio', 'tipoDeVehiculos', 'referencia', 'vehiculo', 'zona', 'turno', 'numeroDeRuta', 'frecuencia', 'POA']);
+app.put('/ruta/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['ruta', 'servicio', 'tipoDeVehiculos', 'referencia', 'zona', 'turno', 'frecuencia', 'descripcionServicio', 'estado']);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ru_modificar')) {
-        let arg = {
-            searchParams: [
-                ['ruta', id]
-            ]
-        };
-        if (Object.entries(body).length > 0) {
-            arg.fields = body;
-            let queryContent = {
-                keys: Object.keys(arg),
-                values: Object.values(arg)
-            };
-            let query = sqlBuilder('update', 'Rutas', queryContent);
-            db.query(query, (err, results, fields) => {
-                if (err) {
-                    return res.status(500).json({
+        Ruta.update(body, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Delete ruta
+// ===============================================
+app.delete('/ruta/:id', verifyToken, (req, res) => {
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('ru_borrar')) {
+        Ruta.update({
+            estado: false
+        }, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+
+// ===============================================
+// Create link ruta-vehiculo
+// ===============================================
+app.post('/ruta_vehiculo', verifyToken, (req, res) => {
+    let body = req.body;
+    let user = req.user;
+    if (user.permisos.includes('ru_escribir')) {
+        if (body.ruta && body.movil) {
+            VehiculosRutas.create(body)
+                .then(linkDB => {
+                    res.json({
+                        vehiculoRuta: linkDB
+                    });
+                }).catch(err => {
+                    res.status(500).json({
                         err
                     });
-                }
-                res.json({
-                    results
-                });
-            });
+                })
         } else {
-            return res.status(400).json({
+            res.status(400).json({
                 err: {
-                    message: 'Nada que actualizar'
+                    message: "La ruta y el vehículo son necesarios"
                 }
             });
         }
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para modificar rutas'
+                message: 'Acceso denegado'
             }
         });
     }
 });
 
 // ===============================================
-// Delete user
+// get link ruta-vehiculo by id
 // ===============================================
-app.delete('/route/:id', verifyToken, (req, res) => {
+app.get('/ruta_vehiculo/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
-    if (user.permisos.includes('ru_borrar')) {
-        let arg = {
-            searchParams: [
-                ['ruta', id]
-            ]
-        };
-        let queryContent = {
-            keys: Object.keys(arg),
-            values: Object.values(arg)
-        };
-        let query = sqlBuilder('delete', 'Rutas', queryContent);
-        db.query(query, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
+    if (user.permisos.includes('ru_leer')) {
+        VehiculosRutas.findByPk(id, {
+            include: [{
+                model: Ruta
+            }, {
+                model: Vehiculo
+            }]
+        }).then(linkDb => {
+            if (!linkDb) {
+                return res.status(404).json({
+                    err: {
+                        message: 'No encontrado'
+                    }
                 });
             }
             res.json({
-                results
+                vehiculoRuta: linkDb
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
             });
         });
     } else {
         res.status(403).json({
             err: {
-                message: 'No está autorizado para borrar rutas'
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get link ruta-vehiculo
+// Optional pagination
+// Default 15 rutas from 0
+// ===============================================
+app.get('/ruta_vehiculo', verifyToken, (req, res) => {
+    let offset = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 15;
+    let where = {};
+    if (req.query.status) {
+        let status = Number(req.query.status);
+        where.estado = status == 1 ? true : false;
+    }
+    let user = req.user;
+    if (user.permisos.includes('ru_leer')) {
+        VehiculosRutas.findAndCountAll({
+            offset,
+            limit,
+            where,
+            include: [{
+                model: Ruta
+            }, {
+                model: Vehiculo
+            }]
+        }).then(reply => {
+            res.json({
+                vehiculosRutas: reply.rows,
+                count: reply.count
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Update link ruta-vehiculo
+// ===============================================
+app.put('/ruta_vehiculo/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['ruta', 'movil', 'estado']);
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('ru_modificar')) {
+        VehiculosRutas.update(body, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Delete link ruta-vehiculo
+// ===============================================
+app.delete('/ruta_vehiculo/:id', verifyToken, (req, res) => {
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('ru_borrar')) {
+        VehiculosRutas.update({
+            estado: false
+        }, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
             }
         });
     }
@@ -238,6 +378,6 @@ app.delete('/route/:id', verifyToken, (req, res) => {
 
 
 // ===============================================
-// Export routes
+// Export rutas
 // ===============================================
 module.exports = app;

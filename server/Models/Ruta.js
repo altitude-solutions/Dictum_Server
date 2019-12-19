@@ -5,17 +5,16 @@
  *
  **/
 
-const mongoose = require('mongoose');
-const uniqueValidator = require('mongoose-unique-validator');
+const { Model, DataTypes } = require('sequelize');
+const { sql } = require('../config/sql');
 
 // ===============================================
-// tipos de vehiculos válidos
+// External Model
 // ===============================================
-let tipoDeVehiculo = {
-    values: ['Carga Trasera', 'Carga Lateral', 'Volqueta', 'Roll On/Off', 'Cisterna', 'Furgon', 'Furgoneta', 'Barredora', 'Fregadora', 'Bus', 'Camioneta'],
-    message: '{VALUE} no es un tipo de vehículo válido'
-};
+const { TipoDeVehiculo, Vehiculo } = require('../Models/Vehicle');
+const { Servicio } = require('../Models/Servicios');
 
+/*
 // ===============================================
 // servicios válidos
 // ===============================================
@@ -23,78 +22,88 @@ let tipoDeServicio = {
     values: ['Recoleccion', 'Transferencia', 'Lavado', 'Barrido Mecanizado', 'Transporte', 'Supervisión', 'Mantenimiento', 'Autosocorro', 'Administración'],
     message: '{VALUE} no es un servicio válido'
 };
+*/
 
 // ===============================================
-// Zonas
+// Modelo de Ruta
 // ===============================================
-let listaZonas = {
-    values: ['', '', '', ''],
-    message: '{VALUE} no es una zona válida'
-};
-
-
-
-// ===============================================
-// Modelo de empleado
-// ===============================================
-let Ruta = new mongoose.Schema({
+class Ruta extends Model {};
+Ruta.init({
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
     ruta: {
-        type: String,
-        required: [true, 'El nombre de la ruta es necesario'],
+        type: DataTypes.STRING,
         unique: true
     },
-    servicio: {
-        type: String,
-        enum: tipoDeServicio,
-        required: [true, 'Al menos un servicio es necesario']
-    },
-    tipoVehiculos: {
-        type: String,
-        enum: tipoDeVehiculo,
-        required: [true, 'Al menos un tipo de vehiculo es necesario']
-    },
     referencia: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
     },
-    vehiculo: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: false
+    zona: {
+        type: DataTypes.STRING
     },
-    zonaYTurno: {
-        type: [Object],
-        required: false
-    },
-    // zona: {
-    //     type: String,
-    //     required: false
-    // },
-    // turno: {
-    //     type: String,
-    //     required: false
-    // },
-    numeroRuta: {
-        type: Number,
-        required: false
+    turno: {
+        type: DataTypes.ENUM(['Nocturno', 'Diurno', 'Tarde'])
     },
     frecuencia: {
-        type: String,
-        required: false
+        type: DataTypes.STRING
     },
-    POA: {
-        type: Boolean,
-        required: false
+    descripcionServicio: {
+        type: DataTypes.STRING
+    },
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     }
+}, {
+    sequelize: sql,
+    timestamps: false,
+    modelName: 'Rutas',
+    tableName: 'Rutas'
+});
+
+Ruta.belongsTo(TipoDeVehiculo, {
+    foreignKey: 'tipoDeVehiculos'
+});
+
+Ruta.belongsTo(Servicio, {
+    foreignKey: 'servicio'
+});
+
+class VehiculosRutas extends Model {};
+VehiculosRutas.init({
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+}, {
+    sequelize: sql,
+    timestamps: false,
+    modelName: 'VehiculosRutas',
+    tableName: 'VehiculosRutas'
+});
+
+VehiculosRutas.belongsTo(Ruta, {
+    foreignKey: 'ruta'
+});
+
+VehiculosRutas.belongsTo(Vehiculo, {
+    foreignKey: 'movil'
 });
 
 // ===============================================
-// Validar los permisos del usuario
+// Export Ruta model
 // ===============================================
-Ruta.plugin(uniqueValidator, {
-    message: '{PATH} debe ser único'
-});
-
-// ===============================================
-// Export Usuario model
-// ===============================================
-module.exports = mongoose.model('Ruta', Ruta);
+module.exports = {
+    Ruta,
+    VehiculosRutas
+}

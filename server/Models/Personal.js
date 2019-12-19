@@ -14,23 +14,6 @@ const { sql } = require('../config/sql');
 // ===============================================
 const { Proyecto } = require('./Proyectos');
 
-/*
-// ===============================================
-// Turnos válidos
-// ===============================================
-let turnosValidos = {
-    values: ['nocturno', 'diurno', 'vespertino'],
-    message: '{VALUE} no es un turno válido'
-}
-// ===============================================
-// Dias laborales
-// ===============================================
-let diasLaborales = {
-    values: ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
-    message: '{VALUE} no es un día válido'
-}
-*/
-
 
 // ===============================================
 // Personnel model
@@ -83,9 +66,39 @@ Personal.belongsTo(Personal, {
 });
 
 
+class Supervisor extends Model {};
+Supervisor.init({
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    zona: {
+        type: DataTypes.STRING
+    },
+    descripcion: {
+        type: DataTypes.STRING
+    },
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+}, {
+    sequelize: sql,
+    modelName: 'Supervisores',
+    timestamps: false,
+    tableName: 'Supervisores'
+});
+
+Supervisor.belongsTo(Personal, {
+    foreignKey: 'supervisor'
+});
+
 // ===============================================
 // Export Personal model
 // ===============================================
 module.exports = {
-    Personal
+    Personal,
+    Supervisor
 }

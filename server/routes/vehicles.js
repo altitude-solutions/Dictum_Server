@@ -20,6 +20,11 @@ const { verifyToken } = require('../middlewares/authentication');
 const { CodigoTipoDeVehiculo, Vehiculo, TipoDeVehiculo } = require('../Models/Vehicle');
 const { MotivosDePago } = require('../Models/Pagos');
 const { Proyecto } = require('../Models/Proyectos');
+const { Servicio, VehiculosServicios } = require('../Models/Servicios');
+const { Conductor } = require('../Models/Conductores');
+const { Personal } = require('../Models/Personal');
+const { VehiculosRutas, Ruta } = require('../Models/Ruta');
+
 
 // ===============================================
 // Create TipoDeVehiculo
@@ -163,7 +168,7 @@ app.put('/tipo_de_vehiculo/:id', verifyToken, (req, res) => {
     }
 });
 
-// TODO: DELETE tipo de vehiculo
+// TODO: Delete tipo de vehiculo
 
 // ===============================================
 // Create CodigoTipoDeVehiculo
@@ -364,7 +369,6 @@ app.post('/vehi', verifyToken, (req, res) => {
 
 // ===============================================
 // Read vehi by id
-// TODO: Populate Rutas, Servicios and Conductores
 // ===============================================
 app.get('/vehi/:id', verifyToken, (req, res) => {
     let id = req.params.id;
@@ -389,8 +393,61 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
                     }
                 });
             }
-            res.json({
-                vehiculo: vehicleDb
+            VehiculosServicios.findAll({
+                where: {
+                    movil: id
+                },
+                include: [{
+                    model: Servicio
+                }]
+            }).then(serviciosDB => {
+                let vehiAux = vehicleDb.toJSON();
+                vehiAux.servicios = [];
+                for (let i = 0; i < serviciosDB.length; i++) {
+                    vehiAux.servicios.push(serviciosDB[i].toJSON());
+                }
+
+                Conductor.findAll({
+                    where: {
+                        movil: id
+                    },
+                    include: [{
+                        model: Personal
+                    }]
+                }).then(conductores => {
+                    vehiAux.conductores = [];
+                    for (let i = 0; i < conductores.length; i++) {
+                        vehiAux.conductores.push(conductores[i].toJSON());
+                    }
+                    VehiculosRutas.findAll({
+                        where: {
+                            movil: id
+                        },
+                        include: [{
+                            model: Ruta
+                        }]
+                    }).then(vehiculosrutas => {
+                        vehiAux.rutas = [];
+                        for (let i = 0; i < vehiculosrutas.length; i++) {
+                            vehiAux.rutas.push(vehiculosrutas[i].toJSON());
+                        }
+                        res.json({
+                            vehiculo: vehiAux
+                        });
+                    }).catch(err => {
+                        res.status(500).json({
+                            err
+                        });
+                    });
+                }).catch(err => {
+                    res.status(500).json({
+                        err
+                    });
+                });
+            }).catch(err => {
+                res.status(500).json({
+                    err
+                });
             });
         }).catch(err => {
             res.status(500).json({
@@ -426,15 +483,12 @@ app.get('/vehi', verifyToken, (req, res) => {
             limit,
             where,
             include: [{
-                    model: MotivosDePago
-                },
-                {
-                    model: Proyecto
-                },
-                {
-                    model: CodigoTipoDeVehiculo
-                }
-            ]
+                model: MotivosDePago
+            }, {
+                model: Proyecto
+            }, {
+                model: CodigoTipoDeVehiculo
+            }]
         }).then(reply => {
             res.json({
                 vehiculos: reply.rows,

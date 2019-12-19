@@ -376,15 +376,12 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
     if (user.permisos.includes('ve_leer')) {
         Vehiculo.findByPk(id, {
             include: [{
-                    model: MotivosDePago
-                },
-                {
-                    model: Proyecto
-                },
-                {
-                    model: CodigoTipoDeVehiculo
-                }
-            ]
+                model: MotivosDePago
+            }, {
+                model: Proyecto
+            }, {
+                model: CodigoTipoDeVehiculo
+            }]
         }).then(vehicleDb => {
             if (!vehicleDb) {
                 return res.status(404).json({
@@ -393,6 +390,9 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
                     }
                 });
             }
+            // ===============================================
+            // TODO: Check status for every populate
+            // ===============================================
             VehiculosServicios.findAll({
                 where: {
                     movil: id
@@ -406,7 +406,6 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
                 for (let i = 0; i < serviciosDB.length; i++) {
                     vehiAux.servicios.push(serviciosDB[i].toJSON());
                 }
-
                 Conductor.findAll({
                     where: {
                         movil: id
@@ -734,7 +733,6 @@ app.delete('/motivos_de_pago/:id', verifyToken, (req, res) => {
         });
     }
 });
-
 
 
 // ===============================================

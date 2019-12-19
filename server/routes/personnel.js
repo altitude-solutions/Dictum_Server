@@ -17,7 +17,7 @@ const { verifyToken } = require('../middlewares/authentication');
 // ===============================================
 // Personnel related models
 // ===============================================
-const { Personal } = require('../Models/Personal');
+const { Personal, Supervisor } = require('../Models/Personal');
 
 // ===============================================
 // Create user
@@ -191,7 +191,177 @@ app.delete('/personnel/:id', verifyToken, (req, res) => {
     }
 });
 
-// TODO: supervisores
+// ===============================================
+// Create supervisor
+// ===============================================
+app.post('/supervisor', verifyToken, (req, res) => {
+    let body = req.body;
+    let user = req.user;
+    if (user.permisos.includes('p_escribir')) {
+        if (body.supervisor && body.zona) {
+            Supervisor.create(body).then(superDB => {
+                res.json({
+                    supervisor: superDB
+                });
+            }).catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'El supervisor y la zona son necesarios'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get Proyecto by id
+// ===============================================
+app.get('/supervisor/:id', verifyToken, (req, res) => {
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('p_leer')) {
+        Supervisor.findByPk(id, {
+            include: [{
+                model: Personal
+            }]
+        }).then(superDB => {
+            if (!superDB) {
+                return res.status(404).json({
+                    err: {
+                        message: 'No encontrado'
+                    }
+                });
+            }
+            res.json({
+                supervisor: superDB
+            });
+        }).catch(err => {
+            return res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get a paginated list of Proyectos
+// default from 0 to 15
+// ===============================================
+app.get('/supervisor', verifyToken, (req, res) => {
+    let from = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 15;
+    let where = {};
+    if (req.query.status) {
+        let status = Number(req.query.status);
+        where.estado = status == 1 ? true : false;
+    }
+    let user = req.user;
+    if (user.permisos.includes('p_leer')) {
+        Supervisor.findAndCountAll({
+            offset: from,
+            limit,
+            where,
+            include: [{
+                model: Personal
+            }]
+        }).then(reply => {
+            res.json({
+                supervisores: reply.rows,
+                count: reply.count
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// update Proyecto
+// ===============================================
+app.put('/supervisor/:id', verifyToken, (req, res) => {
+    let body = _.pick(req.body, ['supervisor', 'zona', 'descripcion', 'estado']);
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('p_modificar')) {
+        Supervisor.update(body, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Delete proyecto
+// ===============================================
+app.delete('/supervisor/:id', verifyToken, (req, res) => {
+    let id = req.params.id;
+    let user = req.user;
+    if (user.permisos.includes('p_borrar')) {
+        Supervisor.update({
+            estado: false
+        }, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+
 
 // ===============================================
 // Export routes

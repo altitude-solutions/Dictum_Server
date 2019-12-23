@@ -17,6 +17,7 @@ app.use(require('./vehicles'));
 app.use(require('./conductores'));
 app.use(require('./servicios'));
 app.use(require('./routes'));
+app.use(require('./finanzas'));
 app.use(require('./operadorRadio'));
 
 // app.use(require('./estacionServicio'));

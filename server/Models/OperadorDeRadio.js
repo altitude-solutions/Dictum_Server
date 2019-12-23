@@ -109,6 +109,9 @@ RegistroDeHorarios.hasMany(CicloDeHorarios, {
     foreignKey: 'parent'
 });
 
+
+sql.sync();
+
 module.exports = {
     RegistroDeHorarios,
     CicloDeHorarios

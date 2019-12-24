@@ -97,6 +97,9 @@ CicloDeHorarios.init({
     },
     comentarios: {
         type: DataTypes.STRING(1023)
+    },
+    modificaciones: {
+        type: DataTypes.STRING(1023)
     }
 }, {
     sequelize: sql,

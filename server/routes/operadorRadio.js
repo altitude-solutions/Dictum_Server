@@ -89,35 +89,45 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('or_escribir')) {
-        // console.log(body);
+        // console.log(JSON.stringify(body).length, 'bytes');
+
+        // console.log(new Date(Number(body[0].horarios[0].salida_base)).getTime());
+        // console.log(new Date(Number(body[0].horarios[0].salida_base)));
+        for (let i = 0; i < body.length; i++) {
+            let registro = body[i];
+            let horarios = body[i].horarios;
+            delete registro.horarios;
+            let registroKeys = Object.keys(registro);
+            registroKeys.forEach(key => {
+                if (registro[key] == '') {
+                    registro[key] = null;
+                }
+            });
+            RegistroDeHorarios.create(registro)
+                .then(registroDB => {
+                    for (let j = 0; j < horarios.length; j++) {
+                        let element = horarios[j];
+                        let keys = Object.keys(element);
+                        for (let k = 0; k < keys.length; k++) {
+                            if (element[keys[k]] == 14400000)
+                                element[keys[k]] = null;
+                        }
+                        element.parent = registroDB.toJSON().id;
+                        CicloDeHorarios.create(element)
+                            .then(cicloDB => {
+                                console.log(cicloDB);
+                            }).catch(err => {
+                                console.log(err);
+                            });
+                    }
+                }).catch(err => {
+                    console.log(err);
+                });
+        }
+
         res.json({
             ok: true
         });
-
-        console.log(new Date(Number(body[0].horarios[0].salida_base)).getTime());
-        console.log(new Date(Number(body[0].horarios[0].salida_base)));
-        for (let i = 0; i < body.length; i++) {
-            for (let j = 0; j < body[i].horarios.length; j++) {
-                let element = body[i].horarios[j];
-                let keys = Object.keys(element);
-                console.log(keys);
-                for (let k = 0; keys.length; k++) {
-                    if (element[keys[k]] == 14400000)
-                        element[keys[k]] = null;
-                }
-                console.log(element);
-            }
-        }
-        // RegistroDeHorarios.create(body)
-        //     .then(saved => {
-        //         res.json({
-        //             horarios: saved
-        //         });
-        //     }).catch(err => {
-        //         res.status(500).json({
-        //             err
-        //         });
-        //     });
     } else {
         res.status(403).json({
             err: {

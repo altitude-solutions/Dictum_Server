@@ -40,7 +40,7 @@ Servicio.init({
     sequelize: sql,
     modelName: 'Servicios',
     timestamps: false,
-    tableName: 'servicios'
+    tableName: 'Servicios'
 });
 
 // ===============================================

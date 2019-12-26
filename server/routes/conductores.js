@@ -18,6 +18,8 @@ const { verifyToken } = require('../middlewares/authentication');
 // Conductores' related Models
 // ===============================================
 const { Conductor } = require('../Models/Conductores');
+const { Personal } = require('../Models/Personal');
+const { Vehiculo, CodigoTipoDeVehiculo, TipoDeVehiculo } = require('../Models/Vehicle');
 
 
 app.post('/conductor', verifyToken, (req, res) => {
@@ -64,7 +66,18 @@ app.get('/conductor', verifyToken, (req, res) => {
         Conductor.findAndCountAll({
             offset: from,
             limit,
-            where
+            where,
+            include: [{
+                model: Vehiculo,
+                include: [{
+                    model: CodigoTipoDeVehiculo,
+                    include: [{
+                        model: TipoDeVehiculo
+                    }]
+                }]
+            }, {
+                model: Personal
+            }]
         }).then((reply) => {
             res.json({
                 conductores: reply.rows,

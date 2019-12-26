@@ -380,7 +380,10 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
             }, {
                 model: Proyecto
             }, {
-                model: CodigoTipoDeVehiculo
+                model: CodigoTipoDeVehiculo,
+                include: [{
+                    model: TipoDeVehiculo
+                }]
             }]
         }).then(vehicleDb => {
             if (!vehicleDb) {
@@ -465,11 +468,11 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
 // ===============================================
 // Get vehicles
 // Optional pagination
-// Default 15 users from 0
+// Default 1000 users from 0
 // ===============================================
 app.get('/vehi', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
-    let limit = Number(req.query.to) || 15;
+    let limit = Number(req.query.to) || 1000;
     let where = {};
     if (req.query.status) {
         let status = Number(req.query.status);
@@ -486,7 +489,10 @@ app.get('/vehi', verifyToken, (req, res) => {
             }, {
                 model: Proyecto
             }, {
-                model: CodigoTipoDeVehiculo
+                model: CodigoTipoDeVehiculo,
+                include: [{
+                    model: TipoDeVehiculo
+                }]
             }]
         }).then(reply => {
             res.json({

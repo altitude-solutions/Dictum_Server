@@ -113,8 +113,6 @@ RegistroDeHorarios.hasMany(CicloDeHorarios, {
 });
 
 
-sql.sync();
-
 module.exports = {
     RegistroDeHorarios,
     CicloDeHorarios

@@ -17,9 +17,7 @@ const app = express();
 // Middlewares
 // ===============================================
 const { verifyToken } = require('../middlewares/authentication');
-const { sqlBuilder } = require('../classes/SQLBuilder');
-
-let db = process.dbConnection;
+// const { VentaDeCombustible } = require('../Models/VentaDeCombustibles');
 
 
 app.post('/ventaCombustible', verifyToken, (req, res) => {
@@ -27,31 +25,14 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
     let user = req.user;
 
     if (user.permisos.includes('es_escribir')) {
-        body.precioTotal = Number(body.precioTotal);
-        body.volumen = Number(body.volumen);
-        body.fecha = new Date(body.fecha).getTime();
-        if (body.kilometraje) {
-            body.kilometraje = Number(body.kilometraje);
-        }
-        let queryContent = {
-            keys: Object.keys(body),
-            values: Object.values(body)
-        };
-        let query = sqlBuilder('insert', 'EstacionDeServicio', queryContent);
-        db.query(query, (err, results, fields) => {
-            if (err) {
-                return res.status(500).json({
-                    err
-                });
-            }
-            res.json({
-                results
-            });
+        console.log(body);
+        res.json({
+            ok: true
         });
     } else {
         return res.status(403).json({
             err: {
-                message: 'Sin autorización'
+                message: 'Acceso denegado'
             }
         });
     }

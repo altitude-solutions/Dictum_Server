@@ -276,6 +276,9 @@ RegistroDeDatos_OR.belongsTo(Supervisor, {
     foreignKey: 'supervisor'
 });
 
+RegistroDeDatos_OR.belongsTo(Usuario, {
+    foreignKey: 'usuario'
+});
 
 module.exports = {
     RegistroDeHorarios,

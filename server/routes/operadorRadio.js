@@ -62,17 +62,44 @@ app.post('/penalties', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('or_escribir')) {
-        console.log(body);
-        RegistroDePenalidades.create(body)
-            .then(saved => {
-                res.json({
-                    penalidad: saved
-                });
-            }).catch(err => {
-                res.status(500).json({
-                    err
-                });
+        body.forEach(element => {
+            let keys = Object.keys(element);
+            keys.forEach(key => {
+                if (element[key] == '') {
+                    element[key] = null;
+                }
+                if (element['horaDeRecepcion'] == 14400000) {
+                    element['horaDeRecepcion'] = null;
+                }
+                if (element['horaDeRespuesta'] == 14400000) {
+                    element['horaDeRespuesta'] = null;
+                }
+                if (element['horaDeContrarespuesta'] == 14400000) {
+                    element['horaDeContrarespuesta'] = null;
+                }
             });
+            // console.log(element);
+            RegistroDePenalidades.create(element)
+                .then(saved => {
+
+                }).catch(err => {
+                    console.log(err);
+                });
+        });
+        res.json({
+            ok: true
+        });
+
+        // RegistroDePenalidades.create(body)
+        //     .then(saved => {
+        //         res.json({
+        //             penalidad: saved
+        //         });
+        //     }).catch(err => {
+        //         res.status(500).json({
+        //             err
+        //         });
+        //     });
     } else {
         res.status(403).json({
             err: {
@@ -115,7 +142,7 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
                         element.parent = registroDB.toJSON().id;
                         CicloDeHorarios.create(element)
                             .then(cicloDB => {
-                                console.log(cicloDB);
+                                //console.log(cicloDB);
                             }).catch(err => {
                                 console.log(err);
                             });
@@ -140,20 +167,54 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
 // ===============================================
 // Create registro de datos
 // ===============================================
-app.post('/ragistroDeDatos', verifyToken, (req, res) => {
+app.post('/registroDeDatos', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('or_escribir')) {
-        RegistroDeDatos_OR.create(body)
-            .then(saved => {
-                res.json({
-                    horarios: saved
-                });
-            }).catch(err => {
-                res.status(500).json({
-                    err
-                });
+        body.forEach(element => {
+            let keys = Object.keys(element);
+            keys.forEach(key => {
+                if (element[key] == '') {
+                    element[key] = null;
+                }
+                if (element['horaDeRecepcion'] == 14400000) {
+                    element['horaDeRecepcion'] = null;
+                }
+                if (element['horaComunicacion'] == 14400000) {
+                    element['horaComunicacion'] = null;
+                }
+                if (element['horaEjecucion'] == 14400000) {
+                    element['horaEjecucion'] = null;
+                }
+                if (element['horaVerificacion'] == 14400000) {
+                    element['horaVerificacion'] = null;
+                }
+                if (element['horaConciliacion'] == 14400000) {
+                    element['horaConciliacion'] = null;
+                }
             });
+            //console.log(element);
+            RegistroDeDatos_OR.create(element)
+                .then(saved => {
+
+                }).catch(err => {
+                    console.err(err);
+                });
+        });
+        res.json({
+            ok: true
+        });
+
+        // RegistroDeDatos_OR.create(body)
+        //     .then(saved => {
+        //         res.json({
+        //             horarios: saved
+        //         });
+        //     }).catch(err => {
+        //         res.status(500).json({
+        //             err
+        //         });
+        //     });
     } else {
         res.status(403).json({
             err: {

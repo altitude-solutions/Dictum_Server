@@ -198,7 +198,7 @@ app.post('/registroDeDatos', verifyToken, (req, res) => {
                 .then(saved => {
 
                 }).catch(err => {
-                    console.err(err);
+                    console.log(err);
                 });
         });
         res.json({

@@ -136,7 +136,7 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
                         let element = horarios[j];
                         let keys = Object.keys(element);
                         for (let k = 0; k < keys.length; k++) {
-                            if (element[keys[k]] == 14400000)
+                            if (element[keys[k]] == 14400000 || element[keys[k]] == '')
                                 element[keys[k]] = null;
                         }
                         element.parent = registroDB.toJSON().id;

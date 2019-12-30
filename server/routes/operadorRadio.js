@@ -174,24 +174,24 @@ app.post('/registroDeDatos', verifyToken, (req, res) => {
         body.forEach(element => {
             let keys = Object.keys(element);
             keys.forEach(key => {
-                if (element[key] == '' || element[key] == 14400000) {
+                if (element[key] == '') {
                     element[key] = null;
                 }
-                // if (element['horaDeRecepcion'] == 14400000) {
-                //     element['horaDeRecepcion'] = null;
-                // }
-                // if (element['horaComunicacion'] == 14400000) {
-                //     element['horaComunicacion'] = null;
-                // }
-                // if (element['horaEjecucion'] == 14400000) {
-                //     element['horaEjecucion'] = null;
-                // }
-                // if (element['horaVerificacion'] == 14400000) {
-                //     element['horaVerificacion'] = null;
-                // }
-                // if (element['horaConciliacion'] == 14400000) {
-                //     element['horaConciliacion'] = null;
-                // }
+                if (element['horaDeRecepcion'] == 14400000) {
+                    element['horaDeRecepcion'] = null;
+                }
+                if (element['horaComunicacion'] == 14400000) {
+                    element['horaComunicacion'] = null;
+                }
+                if (element['horaEjecucion'] == 14400000) {
+                    element['horaEjecucion'] = null;
+                }
+                if (element['horaVerificacion'] == 14400000) {
+                    element['horaVerificacion'] = null;
+                }
+                if (element['horaConciliacion'] == 14400000) {
+                    element['horaConciliacion'] = null;
+                }
             });
             //console.log(element);
             RegistroDeDatos_OR.create(element)

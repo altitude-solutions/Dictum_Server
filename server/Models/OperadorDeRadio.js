@@ -280,8 +280,6 @@ RegistroDeDatos_OR.belongsTo(Usuario, {
     foreignKey: 'usuario'
 });
 
-sql.sync();
-
 module.exports = {
     RegistroDeHorarios,
     CicloDeHorarios,

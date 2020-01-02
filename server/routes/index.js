@@ -20,8 +20,8 @@ app.use(require('./routes'));
 app.use(require('./finanzas'));
 app.use(require('./PlanesDePago'));
 app.use(require('./operadorRadio'));
-
-// app.use(require('./estacionServicio'));
+app.use(require('./estacionServicio'));
+app.use(require('./operadorBase'));
 
 
 

@@ -393,9 +393,6 @@ app.get('/vehi/:id', verifyToken, (req, res) => {
                     }
                 });
             }
-            // ===============================================
-            // TODO: Check status for every populate
-            // ===============================================
             VehiculosServicios.findAll({
                 where: {
                     movil: id

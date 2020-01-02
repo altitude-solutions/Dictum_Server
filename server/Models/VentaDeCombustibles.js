@@ -30,12 +30,34 @@ VentaDeCombustible.init({
         primaryKey: true,
         autoIncrement: true
     },
-
+    producto: {
+        type: DataTypes.ENUM(['Diesel', 'Gasolina'])
+    },
+    litros: {
+        type: DataTypes.FLOAT
+    },
+    precioTotal: {
+        type: DataTypes.FLOAT
+    },
+    fechaYHora: {
+        type: DataTypes.BIGINT
+    },
+    kilometraje: {
+        type: DataTypes.FLOAT
+    }
 }, {
-    tableName: 'VentaDeCombustible',
-    modelName: 'VentaDeCombustible',
+    tableName: 'venta_de_combustible',
+    modelName: 'venta_de_combustible',
     timestamps: false,
     sequelize: sql
+});
+
+VentaDeCombustible.belongsTo(Vehiculo, {
+    foreignKey: 'movil'
+});
+
+VentaDeCombustible.belongsTo(Usuario, {
+    foreignKey: 'usuario'
 });
 
 

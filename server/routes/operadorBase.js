@@ -25,7 +25,6 @@ app.post('/operadorBase', verifyToken, (req, res) => {
     // console.log(body);
     if (user.permisos.includes('io_escribir')) {
         body.forEach(element => {
-            console.log(element);
             let keys = Object.keys(element);
             keys.forEach(key => {
                 if (element[key] == '') {

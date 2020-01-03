@@ -116,10 +116,6 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('or_escribir')) {
-        // console.log(JSON.stringify(body).length, 'bytes');
-
-        // console.log(new Date(Number(body[0].horarios[0].salida_base)).getTime());
-        // console.log(new Date(Number(body[0].horarios[0].salida_base)));
         for (let i = 0; i < body.length; i++) {
             let registro = body[i];
             let horarios = body[i].horarios;

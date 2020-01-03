@@ -92,7 +92,7 @@ app.get('/personnel/:id', verifyToken, (req, res) => {
 // ===============================================
 app.get('/personnel', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
-    let limit = Number(req.query.to) || 15;
+    let limit = Number(req.query.to) || 1000;
     let where = {};
     if (req.query.status) {
         let status = Number(req.query.status);

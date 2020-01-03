@@ -70,8 +70,7 @@ Ruta.belongsTo(TipoDeVehiculo, {
 });
 
 Ruta.belongsTo(Servicio, {
-    foreignKey: 'servicio_id',
-    as: 'servicio'
+    foreignKey: 'servicio_id'
 });
 
 class VehiculosRutas extends Model {};
@@ -94,8 +93,7 @@ VehiculosRutas.init({
 });
 
 VehiculosRutas.belongsTo(Ruta, {
-    foreignKey: 'ruta_id',
-    as: 'ruta'
+    foreignKey: 'ruta_id'
 });
 
 VehiculosRutas.belongsTo(Vehiculo, {

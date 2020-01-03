@@ -39,8 +39,7 @@ Conductor.init({
 });
 
 Conductor.belongsTo(Personal, {
-    foreignKey: 'personal_id',
-    as: 'personal'
+    foreignKey: 'personal_id'
 });
 
 Conductor.belongsTo(Vehiculo, {

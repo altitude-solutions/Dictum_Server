@@ -60,8 +60,7 @@ OperadorBase.belongsTo(Personal, {
 });
 
 OperadorBase.belongsTo(Usuario, {
-    foreignKey: 'usuario_id',
-    as: 'usuario'
+    foreignKey: 'usuario_id'
 });
 
 

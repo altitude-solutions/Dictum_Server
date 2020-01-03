@@ -52,8 +52,7 @@ RegistroDeHorarios.belongsTo(Vehiculo, {
 });
 
 RegistroDeHorarios.belongsTo(Ruta, {
-    foreignKey: 'ruta_id',
-    as: 'ruta'
+    foreignKey: 'ruta_id'
 });
 
 RegistroDeHorarios.belongsTo(Personal, {
@@ -61,8 +60,7 @@ RegistroDeHorarios.belongsTo(Personal, {
 });
 
 RegistroDeHorarios.belongsTo(Usuario, {
-    foreignKey: 'usuario_id',
-    as: 'usuario'
+    foreignKey: 'usuario_id'
 });
 
 CicloDeHorarios.init({
@@ -90,7 +88,7 @@ CicloDeHorarios.init({
     ingresoRelleno: {
         type: DataTypes.BIGINT
     },
-    inicioAmuerzo: {
+    inicioAlmuerzo: {
         type: DataTypes.BIGINT
     },
     finalAlmuerzo: {
@@ -168,8 +166,7 @@ RegistroDePenalidades.init({
 });
 
 RegistroDePenalidades.belongsTo(Ruta, {
-    foreignKey: 'ruta_id',
-    as: 'ruta'
+    foreignKey: 'ruta_id'
 });
 
 RegistroDePenalidades.belongsTo(Vehiculo, {
@@ -181,8 +178,7 @@ RegistroDePenalidades.belongsTo(Supervisor, {
 });
 
 RegistroDePenalidades.belongsTo(Usuario, {
-    foreignKey: 'usuario_id',
-    as: 'usuario'
+    foreignKey: 'usuario_id'
 });
 
 ListaDeDatos_OR.init({
@@ -281,8 +277,7 @@ RegistroDeDatos_OR.belongsTo(Supervisor, {
 });
 
 RegistroDeDatos_OR.belongsTo(Usuario, {
-    foreignKey: 'usuario_id',
-    as: 'usuario'
+    foreignKey: 'usuario_id'
 });
 
 module.exports = {

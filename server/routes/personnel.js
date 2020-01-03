@@ -134,7 +134,7 @@ app.get('/personnel', verifyToken, (req, res) => {
 // Update user
 // ===============================================
 app.put('/personnel/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['nombre', 'carnet', 'cargo', 'proyecto', 'turno', 'zona', 'subZona', 'ruta', 'supervisor', 'diasLaborales', 'estado']);
+    let body = _.pick(req.body, ['nombre', 'carnet', 'cargo', 'turno', 'lugarDeTrabajo', 'seccion', 'superior', 'diasLaborales', 'estado', 'proyecto_id']);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('p_modificar')) {

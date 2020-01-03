@@ -142,7 +142,7 @@ app.get('/ruta', verifyToken, (req, res) => {
 // Update ruta
 // ===============================================
 app.put('/ruta/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['ruta', 'servicio', 'tipoDeVehiculos', 'referencia', 'zona', 'turno', 'frecuencia', 'descripcionServicio', 'estado']);
+    let body = _.pick(req.body, ['ruta', 'servicio_id', 'tipoDeVehiculos', 'referencia', 'zona', 'turno', 'frecuencia', 'descripcionServicio', 'estado']);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ru_modificar')) {
@@ -319,7 +319,7 @@ app.get('/ruta_vehiculo', verifyToken, (req, res) => {
 // Update link ruta-vehiculo
 // ===============================================
 app.put('/ruta_vehiculo/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['ruta', 'movil', 'estado']);
+    let body = _.pick(req.body, ['ruta_id', 'movil', 'estado']);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('ru_modificar')) {

@@ -225,6 +225,5 @@ app.post('/registroDeDatos', verifyToken, (req, res) => {
 });
 
 // TODO("Cargar ultimos 30 dias en tablas para visualizar, pagina web")
-// TODO("Lista para tipo de contenedor y tipo de mantenimiento")
 
 module.exports = app;

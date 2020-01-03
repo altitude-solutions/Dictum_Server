@@ -645,7 +645,7 @@ app.get('/motivos_de_pago/:id', verifyToken, (req, res) => {
 // ===============================================
 app.get('/motivos_de_pago', verifyToken, (req, res) => {
     let from = Number(req.query.from) || 0;
-    let limit = Number(req.query.to) || 15;
+    let limit = Number(req.query.to) || 1000;
     let where = {};
     if (req.query.status) {
         let status = Number(req.query.status);
@@ -680,7 +680,7 @@ app.get('/motivos_de_pago', verifyToken, (req, res) => {
 // update Proyecto
 // ===============================================
 app.put('/motivos_de_pago/:id', verifyToken, (req, res) => {
-    let body = _.pick(req.body, ['proyecto', 'estado']);
+    let body = _.pick(req.body, ['motivo', 'estado']);
     let id = req.params.id;
     let user = req.user;
     if (user.permisos.includes('pro_modificar')) {

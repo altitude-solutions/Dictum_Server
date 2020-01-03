@@ -66,9 +66,9 @@ Usuario.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'Usuarios',
+    modelName: 'usuarios',
     timestamps: false,
-    tableName: 'Usuarios'
+    tableName: 'usuarios'
 });
 
 

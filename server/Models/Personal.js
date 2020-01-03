@@ -52,9 +52,9 @@ Personal.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'Personal',
+    modelName: 'personal',
     timestamps: false,
-    tableName: 'Personal'
+    tableName: 'personal'
 });
 
 Personal.belongsTo(Proyecto, {
@@ -86,9 +86,9 @@ Supervisor.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'Supervisores',
+    modelName: 'supervisores',
     timestamps: false,
-    tableName: 'Supervisores'
+    tableName: 'supervisores'
 });
 
 Supervisor.belongsTo(Personal, {

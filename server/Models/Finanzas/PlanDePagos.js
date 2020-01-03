@@ -90,8 +90,8 @@ PlanDePagos.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    tableName: 'PlanesDePago',
-    modelName: 'PlanesDePago'
+    tableName: 'planes_de_pago',
+    modelName: 'planes_de_pago'
 });
 
 PlanDePagos.belongsTo(LineasDeCredito, {
@@ -143,8 +143,8 @@ CuotaPlanDePagos.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    tableName: 'CuotasDelPlanDePagos',
-    modelName: 'CuotasDelPlanDePagos'
+    tableName: 'cuotas_del_plan_de_pagos',
+    modelName: 'cuotas_del_plan_de_pagos'
 });
 
 CuotaPlanDePagos.belongsTo(PlanDePagos, {

@@ -33,9 +33,9 @@ Conductor.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'Conductores',
+    modelName: 'conductores',
     timestamps: false,
-    tableName: 'Conductores'
+    tableName: 'conductores'
 });
 
 Conductor.belongsTo(Personal, {

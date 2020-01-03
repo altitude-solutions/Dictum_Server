@@ -48,8 +48,8 @@ LineasDeCredito.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    tableName: 'LineasDeCredito',
-    modelName: 'LineasDeCredito'
+    tableName: 'lineas_de_credito',
+    modelName: 'lineas_de_credito'
 });
 
 LineasDeCredito.belongsTo(EntidadFinanciera, {

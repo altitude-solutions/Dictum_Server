@@ -34,8 +34,8 @@ TipoDeEntidad.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    tableName: 'TiposDeEntidad',
-    modelName: 'TiposDeEntidad'
+    tableName: 'tipos_de_entidad',
+    modelName: 'tipos_de_entidad'
 });
 
 // ===============================================
@@ -59,8 +59,8 @@ EntidadFinanciera.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    tableName: 'EntidadesFinanciera',
-    modelName: 'EntidadesFinanciera'
+    tableName: 'entidades_financieras',
+    modelName: 'entidades_financieras'
 });
 
 EntidadFinanciera.belongsTo(TipoDeEntidad, {
@@ -88,8 +88,8 @@ EmpresaGrupo.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    tableName: 'EmpresasGrupo',
-    modelName: 'EmpresasGrupo'
+    tableName: 'empresas_grupo',
+    modelName: 'empresas_grupo'
 });
 
 module.exports = {

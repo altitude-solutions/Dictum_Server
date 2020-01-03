@@ -28,9 +28,9 @@ MotivosDePago.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'MotivosDePago',
+    modelName: 'motivos_de_pago',
     timestamps: false,
-    tableName: 'MotivosDePago'
+    tableName: 'motivos_de_pago'
 });
 
 // ===============================================

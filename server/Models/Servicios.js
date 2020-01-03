@@ -38,9 +38,9 @@ Servicio.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'Servicios',
+    modelName: 'servicios',
     timestamps: false,
-    tableName: 'Servicios'
+    tableName: 'servicios'
 });
 
 // ===============================================
@@ -60,8 +60,8 @@ VehiculosServicios.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'VehiculosServicios',
-    tableName: 'VehiculosServicios',
+    modelName: 'vehiculos_servicios',
+    tableName: 'vehiculos_servicios',
     timestamps: false
 });
 

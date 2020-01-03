@@ -61,8 +61,8 @@ Ruta.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    modelName: 'Rutas',
-    tableName: 'Rutas'
+    modelName: 'rutas',
+    tableName: 'rutas'
 });
 
 Ruta.belongsTo(TipoDeVehiculo, {
@@ -88,8 +88,8 @@ VehiculosRutas.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    modelName: 'VehiculosRutas',
-    tableName: 'VehiculosRutas'
+    modelName: 'vehiculos_rutas',
+    tableName: 'vehiculos_rutas'
 });
 
 VehiculosRutas.belongsTo(Ruta, {

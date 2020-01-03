@@ -42,8 +42,8 @@ RegistroDeHorarios.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    modelName: 'RegistroDeHorarios',
-    tableName: 'RegistroDeHorarios'
+    modelName: 'registro_de_horarios',
+    tableName: 'registro_de_horarios'
 });
 
 
@@ -106,8 +106,8 @@ CicloDeHorarios.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    modelName: 'CicloDeHorarios',
-    tableName: 'CicloDeHorarios'
+    modelName: 'ciclo_de_horarios',
+    tableName: 'ciclo_de_horarios'
 });
 
 RegistroDeHorarios.hasMany(CicloDeHorarios, {
@@ -161,8 +161,8 @@ RegistroDePenalidades.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    modelName: 'RegistroDePenalidades',
-    tableName: 'RegistroDePenalidades'
+    modelName: 'registro_de_penalidades',
+    tableName: 'registro_de_penalidades'
 });
 
 RegistroDePenalidades.belongsTo(Ruta, {
@@ -194,8 +194,8 @@ ListaDeDatos_OR.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    modelName: 'ListaDeDatos_OR',
-    tableName: 'ListaDeDatos_OR'
+    modelName: 'lista_de_datos_or',
+    tableName: 'lista_de_datos_or'
 });
 
 RegistroDeDatos_OR.init({
@@ -256,8 +256,8 @@ RegistroDeDatos_OR.init({
 }, {
     sequelize: sql,
     timestamps: false,
-    modelName: 'RegistroDeDatos_OR',
-    tableName: 'RegistroDeDatos_OR'
+    modelName: 'registro_de_datos_or',
+    tableName: 'registro_de_datos_or'
 });
 
 RegistroDeDatos_OR.belongsTo(ListaDeDatos_OR, {

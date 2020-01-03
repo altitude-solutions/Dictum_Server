@@ -37,8 +37,8 @@ TipoDeVehiculo.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'TiposDeVehiculo',
-    tableName: 'TiposDeVehiculo',
+    modelName: 'tipos_de_vehiculo',
+    tableName: 'tipos_de_vehiculo',
     timestamps: false
 });
 
@@ -63,8 +63,8 @@ CodigoTipoDeVehiculo.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'CodigosTiposDeVehiculo',
-    tableName: 'CodigosTiposDeVehiculo',
+    modelName: 'codigos_tipos_de_vehiculo',
+    tableName: 'codigos_tipos_de_vehiculo',
     timestamps: false
 });
 
@@ -153,9 +153,9 @@ Vehiculo.init({
     }
 }, {
     sequelize: sql,
-    modelName: 'Vehiculos',
+    modelName: 'vehiculos',
     timestamps: false,
-    tableName: 'Vehiculos'
+    tableName: 'vehiculos'
 });
 
 Vehiculo.belongsTo(CodigoTipoDeVehiculo, {

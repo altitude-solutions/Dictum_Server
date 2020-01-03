@@ -58,7 +58,8 @@ Personal.init({
 });
 
 Personal.belongsTo(Proyecto, {
-    foreignKey: 'proyecto'
+    foreignKey: 'proyecto_id',
+    as: 'proyecto'
 });
 
 Personal.belongsTo(Personal, {

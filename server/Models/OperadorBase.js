@@ -60,8 +60,10 @@ OperadorBase.belongsTo(Personal, {
 });
 
 OperadorBase.belongsTo(Usuario, {
-    foreignKey: 'usuario'
+    foreignKey: 'usuario_id',
+    as: 'usuario'
 });
+
 
 sql.sync();
 

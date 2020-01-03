@@ -70,7 +70,8 @@ VehiculosServicios.belongsTo(Vehiculo, {
 });
 
 VehiculosServicios.belongsTo(Servicio, {
-    foreignKey: 'servicio'
+    foreignKey: 'servicio_id',
+    as: 'servicio'
 });
 
 // Export model

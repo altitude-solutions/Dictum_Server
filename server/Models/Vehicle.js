@@ -163,7 +163,8 @@ Vehiculo.belongsTo(CodigoTipoDeVehiculo, {
 });
 
 Vehiculo.belongsTo(Proyecto, {
-    foreignKey: 'proyecto'
+    foreignKey: 'proyecto_id',
+    as: 'proyecto'
 });
 
 Vehiculo.belongsTo(MotivosDePago, {

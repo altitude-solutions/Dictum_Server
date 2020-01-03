@@ -57,7 +57,8 @@ VentaDeCombustible.belongsTo(Vehiculo, {
 });
 
 VentaDeCombustible.belongsTo(Usuario, {
-    foreignKey: 'usuario'
+    foreignKey: 'usuario_id',
+    as: 'usuario'
 });
 
 

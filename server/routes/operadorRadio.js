@@ -147,7 +147,6 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
                     console.log(err);
                 });
         }
-
         res.json({
             ok: true
         });

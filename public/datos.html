@@ -33,22 +33,27 @@
             return request;
         }
 
+        function formatTime(date) {
+            return `${date.getDate()<10?'0': ''}${date.getDate()}/${date.getMonth()+1<10? '0': ''}${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()<10?'0': ''}${date.getMinutes()}:${date.getSeconds()<10?'0': ''}${date.getSeconds()}`
+        }
+
         let html = '';
         let table = document.getElementById('table');
 
+        //id diario, dato, sigma, zona, direcc, cantidadpoda, tipoDeContenedor,
+        //codigoDeContenedor, Mantenimento, detalle, comentarios, horaDeRecepcion,
+        //resCom, horaComunicacion, resEje, horaEjecucion, supervisor, horaVerificacion,
+        //sigmaDeConciliacion, horaConciliacion
         // table headers
         html += '<tr>';
-        html += '    <td>';
-        html += '        ID registro';
-        html += '    </td>';
         html += '    <td>';
         html += '        ID diario';
         html += '    </td>';
         html += '    <td>';
-        html += '        Sigma de recepción';
+        html += '        Dato';
         html += '    </td>';
         html += '    <td>';
-        html += '        Hora de recepción';
+        html += '        Sigma de recepción';
         html += '    </td>';
         html += '    <td>';
         html += '        Zona';
@@ -60,46 +65,46 @@
         html += '        Cantidad de Poda';
         html += '    </td>';
         html += '    <td>';
+        html += '        Tipo de Contenedor';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Código de Contenedor';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Mantenimiento';
+        html += '    </td>';
+        html += '    <td>';
         html += '        Detalle';
         html += '    </td>';
         html += '    <td>';
         html += '        Comentarios';
         html += '    </td>';
         html += '    <td>';
-        html += '        Tipo de Contenedor';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Codigo de Contenedor';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Mantenimiento';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de comunicación';
+        html += '        Hora de recepción';
         html += '    </td>';
         html += '    <td>';
         html += '        Responsable de comunicación';
         html += '    </td>';
         html += '    <td>';
-        html += '        Hora de ejecución';
+        html += '        Hora de comunicación';
         html += '    </td>';
         html += '    <td>';
         html += '        Responsable de ejecución';
         html += '    </td>';
         html += '    <td>';
-        html += '        Hora de verificación';
+        html += '        Hora de ejecición';
         html += '    </td>';
         html += '    <td>';
         html += '        Supervisor';
         html += '    </td>';
         html += '    <td>';
-        html += '        Hora de conciliación';
+        html += '        Hora de verificacion';
         html += '    </td>';
         html += '    <td>';
         html += '        Sigma de conciliación';
         html += '    </td>';
         html += '    <td>';
-        html += '        Dato';
+        html += '        Hora de conciliación';
         html += '    </td>';
         html += '</tr>';
 
@@ -150,7 +155,6 @@
             if (dataRequest.readyState == 4) {
                 if (dataRequest.status == 200) {
                     let res = JSON.parse(dataRequest.response);
-                    console.log(res);
                     let regs = res.registros;
                     let counter = 0;
                     regs.forEach(element => {
@@ -161,16 +165,13 @@
                         }
                         counter++;
                         html += '    <td>';
-                        html += `        ${element.id}`;
-                        html += '    </td>';
-                        html += '    <td>';
                         html += `        ${element.idDiario? element.idDiario: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.sigmaDeRecepcion? element.sigmaDeRecepcion: '-'}`;
+                        html += `        ${element.lista_de_datos_or? element.lista_de_datos_or.dato: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.horaDeRecepcion? new Date(element.horaDeRecepcion).toLocaleString(): '-'}`;
+                        html += `        ${element.sigmaDeRecepcion? element.sigmaDeRecepcion: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         html += `        ${element.zona? element.zona: '-'}`;
@@ -182,12 +183,6 @@
                         html += `        ${element.cantidadPoda? element.cantidadPoda: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.detalle? element.detalle: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.comentarios? element.comentarios: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
                         html += `        ${element.tipoDeContenedor? element.tipoDeContenedor: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
@@ -197,7 +192,13 @@
                         html += `        ${element.Mantenimento? element.Mantenimento: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.horaComunicacion? new Date(element.horaComunicacion).toLocaleString(): '-'}`;
+                        html += `        ${element.detalle? element.detalle: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.comentarios? element.comentarios: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaDeRecepcion? formatTime(new Date(element.horaDeRecepcion)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         if (element.resCom) {
@@ -207,7 +208,7 @@
                         }
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.horaEjecucion? new Date(element.horaEjecucion).toLocaleString(): '-'}`;
+                        html += `        ${element.horaComunicacion? formatTime(new Date(element.horaComunicacion)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         if (element.resEje) {
@@ -217,22 +218,21 @@
                         }
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.horaVerificacion? new Date(element.horaVerificacion).toLocaleString(): '-'}`;
+                        html += `        ${element.horaEjecucion? formatTime(new Date(element.horaEjecucion)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         html += `        ${element.supervisore? element.supervisore.zona: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.horaConciliacion? new Date(element.horaConciliacion).toLocaleString(): '-'}`;
+                        html += `        ${element.horaVerificacion? formatTime(new Date(element.horaVerificacion)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         html += `        ${element.sigmaDeConciliacion? element.sigmaDeConciliacion: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.lista_de_datos_or? element.lista_de_datos_or.dato: '-'}`;
+                        html += `        ${element.horaConciliacion? formatTime(new Date(element.horaConciliacion)): '-'}`;
                         html += '    </td>';
                         html += '</tr>';
-
                     });
 
                     table.innerHTML = html;

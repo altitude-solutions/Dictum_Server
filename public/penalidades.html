@@ -33,14 +33,18 @@
             return request;
         }
 
+        function formatTime(date) {
+            return `${date.getDate()<10?'0': ''}${date.getDate()}/${date.getMonth()+1<10? '0': ''}${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()<10?'0': ''}${date.getMinutes()}:${date.getSeconds()<10?'0': ''}${date.getSeconds()}`
+        }
+
         let html = '';
         let table = document.getElementById('table');
 
+        //item, tipoDePenalidad, sigma, ruta, movil, detalle, horaDeRecepcion,
+        //supervisor, respuesta, horaDeRespuesta, contrarespuesta, horaDeContrarespuesta,
+        //comentarios
         // table headers
         html += '<tr>';
-        html += '    <td>';
-        html += '        ID registro';
-        html += '    </td>';
         html += '    <td>';
         html += '        Item';
         html += '    </td>';
@@ -48,28 +52,7 @@
         html += '        Tipo de penalidad';
         html += '    </td>';
         html += '    <td>';
-        html += '        Detalle';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Comentarios';
-        html += '    </td>';
-        html += '    <td>';
         html += '        Sigma';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de recepción';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de Respuesta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Respuesta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de Contra-respuesta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Contra-respuesta';
         html += '    </td>';
         html += '    <td>';
         html += '        Ruta';
@@ -78,7 +61,28 @@
         html += '        Móvil';
         html += '    </td>';
         html += '    <td>';
+        html += '        Detalle';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de Recepción';
+        html += '    </td>';
+        html += '    <td>';
         html += '        Supervisor';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Respuesta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de respuesta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Contra-respuesta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de contra-respuesta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Comentarios';
         html += '    </td>';
         html += '</tr>';
 
@@ -141,37 +145,13 @@
                         }
                         counter++;
                         html += '    <td>';
-                        html += `        ${element.id}`;
-                        html += '    </td>';
-                        html += '    <td>';
                         html += `        ${element.item? element.item: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         html += `        ${element.tipoDePenalidad? element.tipoDePenalidad: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.detalle? element.detalle: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.comentarios? element.comentarios: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
                         html += `        ${element.sigma? element.sigma: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.horaDeRecepcion? new Date(element.horaDeRecepcion).toLocaleString(): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.horaDeRespuesta? new Date(element.horaDeRespuesta).toLocaleString(): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.respuesta? element.respuesta: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.horaDeContrarespuesta? new Date(element.horaDeContrarespuesta).toLocaleString(): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.contrarespuesta? element.contrarespuesta: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         html += `        ${element.ruta? element.ruta.ruta: '-'}`;
@@ -180,7 +160,28 @@
                         html += `        ${element.movil? element.movil: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.supervisore? element.supervisore.zona: '-'}`;
+                        html += `        ${element.detalle? element.detalle: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaDeRecepcion? formatTime(new Date(element.horaDeRecepcion)): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.supervisore ? element.supervisore.zona : '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.respuesta ? element.respuesta : '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaDeRespuesta ? formatTime(new Date(element.horaDeRespuesta)) : '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.contrarespuesta ? element.contrarespuesta : '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaDeContrarespuesta ? formatTime(new Date(element.horaDeContrarespuesta)) : '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.comentarios ? element.comentarios : '-'}`;
                         html += '    </td>';
                         html += '</tr>';
                     });

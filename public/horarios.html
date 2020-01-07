@@ -33,17 +33,15 @@
             return request;
         }
 
+        function formatTime(date) {
+            return `${date.getDate()<10?'0': ''}${date.getDate()}/${date.getMonth()+1<10? '0': ''}${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()<10?'0': ''}${date.getMinutes()}:${date.getSeconds()<10?'0': ''}${date.getSeconds()}`
+        }
+
         let html = '';
         let table = document.getElementById('table');
 
         // table headers
         html += '<tr>';
-        html += '    <td>';
-        html += '        ID registro';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        ID ciclo';
-        html += '    </td>';
         html += '    <td>';
         html += '        Móvil';
         html += '    </td>';
@@ -150,12 +148,6 @@
                         }
                         counter++;
                         html += '    <td>';
-                        html += `        ${element.registro_de_horario.id}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.id}`;
-                        html += '    </td>';
-                        html += '    <td>';
                         html += `        ${element.registro_de_horario.movil? element.registro_de_horario.movil: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
@@ -172,31 +164,31 @@
                         }
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.salidaBase? new Date(element.salidaBase).toLocaleString(): '-'}`;
+                        html += `        ${element.salidaBase? formatTime(new Date(element.salidaBase)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.inicioRuta? new Date(element.inicioRuta).toLocaleString(): '-'}`;
+                        html += `        ${element.inicioRuta? formatTime(new Date(element.inicioRuta)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.finRuta? new Date(element.finRuta).toLocaleString(): '-'}`;
+                        html += `        ${element.finRuta? formatTime(new Date(element.finRuta)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.abandonoRuta? new Date(element.abandonoRuta).toLocaleString(): '-'}`;
+                        html += `        ${element.abandonoRuta? formatTime(new Date(element.abandonoRuta)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.salidaRelleno? new Date(element.salidaRelleno).toLocaleString(): '-'}`;
+                        html += `        ${element.salidaRelleno? formatTime(new Date(element.salidaRelleno)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.ingresoRelleno? new Date(element.ingresoRelleno).toLocaleString(): '-'}`;
+                        html += `        ${element.ingresoRelleno? formatTime(new Date(element.ingresoRelleno)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.inicioAlmuerzo? new Date(element.inicioAlmuerzo).toLocaleString(): '-'}`;
+                        html += `        ${element.inicioAlmuerzo? formatTime(new Date(element.inicioAlmuerzo)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.finalAlmuerzo? new Date(element.finalAlmuerzo).toLocaleString(): '-'}`;
+                        html += `        ${element.finalAlmuerzo? formatTime(new Date(element.finalAlmuerzo)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.regresoBase? new Date(element.regresoBase).toLocaleString(): '-'}`;
+                        html += `        ${element.regresoBase? formatTime(new Date(element.regresoBase)): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         html += `        ${element.comentarios? element.comentarios: '-'}`;

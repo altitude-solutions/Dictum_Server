@@ -366,6 +366,5 @@ app.get('/registroDeDatos', verifyToken, (req, res) => {
     }
 });
 
-// TODO("Cargar ultimos 30 dias en tablas para visualizar, pagina web")
 
 module.exports = app;

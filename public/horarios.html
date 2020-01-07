@@ -156,19 +156,23 @@
                         html += `        ${element.id}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.registro_de_horario.movil}`;
+                        html += `        ${element.registro_de_horario.movil? element.registro_de_horario.movil: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.registro_de_horario.ayudantes}`;
+                        html += `        ${element.registro_de_horario.ayudantes? element.registro_de_horario.ayudantes: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.registro_de_horario.ruta.ruta}`;
+                        html += `        ${element.registro_de_horario.ruta? element.registro_de_horario.ruta.ruta: '-'}`;
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${element.registro_de_horario.personal.idPersonal}-${element.registro_de_horario.personal.nombre}`;
+                        if (element.registro_de_horario.personal) {
+                            html += `        ${element.registro_de_horario.personal.idPersonal}-${element.registro_de_horario.personal.nombre}`;
+                        } else {
+                            html += `        -`;
+                        }
                         html += '    </td>';
                         html += '    <td>';
-                        html += `        ${new Date(element.salidaBase).toLocaleString()}`;
+                        html += `        ${element.salidaBase? new Date(element.salidaBase).toLocaleString(): '-'}`;
                         html += '    </td>';
                         html += '    <td>';
                         html += `        ${element.inicioRuta? new Date(element.inicioRuta).toLocaleString(): '-'}`;

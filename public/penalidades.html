@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Datos LPL</title>
+</head>
+
+<body>
+
+    <h1 style="text-align: center;">Registro de Penalidades</h1>
+    <table id="table" border="1">
+
+    </table>
+
+    <script>
+        function getRequest() {
+            try {
+                var request = new XMLHttpRequest();
+            } catch (err) {
+                try {
+                    var request = ActiveXObject('Msxm12.XMLHTTP');
+                } catch (err2) {
+                    try {
+                        var request = ActiveXObject('Microsoft.EXMLHTTP');
+                    } catch (err3) {
+                        var request = false;
+                    }
+                }
+            }
+            return request;
+        }
+
+        let html = '';
+        let table = document.getElementById('table');
+
+        // table headers
+        html += '<tr>';
+        html += '    <td>';
+        html += '        ID registro';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Item';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Tipo de penalidad';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Detalle';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Comentarios';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Sigma';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de recepción';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de Respuesta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Respuesta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de Contra-respuesta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Contra-respuesta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Ruta';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Móvil';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Supervisor';
+        html += '    </td>';
+        html += '</tr>';
+
+
+        let token;
+        if (!sessionStorage.getItem('token')) {
+            let loggedIn = false;
+            while (!loggedIn) {
+                let userName = "";
+                while (!userName) {
+                    userName = prompt("Nombre de usuario", "");
+                }
+
+                let password = "";
+                while (!password) {
+                    password = prompt("Contraseña", "");
+                }
+
+                let loginRequest = getRequest();
+
+                loginRequest.onreadystatechange = () => {
+                    if (loginRequest.readyState == 4) {
+                        if (loginRequest.status == 200) {
+                            let res = JSON.parse(loginRequest.response);
+                            token = res.token;
+                            sessionStorage.setItem('token', token);
+                            loggedIn = true;
+                        } else {
+                            let res = JSON.parse(loginRequest.response);
+                            alert(res.err.message);
+                        }
+                    }
+                };
+                let body = {
+                    nombreUsuario: userName,
+                    contra: password
+                };
+
+                loginRequest.open('POST', '/login', false);
+                loginRequest.setRequestHeader('Content-Type', 'application/json');
+                loginRequest.send(JSON.stringify(body));
+            }
+        } else {
+            token = sessionStorage.getItem('token');
+        }
+        let dataRequest = getRequest();
+
+        dataRequest.onreadystatechange = () => {
+            if (dataRequest.readyState == 4) {
+                if (dataRequest.status == 200) {
+                    let res = JSON.parse(dataRequest.response);
+                    // console.log(res);
+                    let regs = res.registros;
+                    let counter = 0;
+                    regs.forEach(element => {
+                        if (counter % 2 == 0) {
+                            html += '<tr bgcolor="#b7e1df">';
+                        } else {
+                            html += '<tr>';
+                        }
+                        counter++;
+                        html += '    <td>';
+                        html += `        ${element.id}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.item? element.item: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.tipoDePenalidad? element.tipoDePenalidad: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.detalle? element.detalle: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.comentarios? element.comentarios: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.sigma? element.sigma: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaDeRecepcion? new Date(element.horaDeRecepcion).toLocaleString(): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaDeRespuesta? new Date(element.horaDeRespuesta).toLocaleString(): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.respuesta? element.respuesta: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaDeContrarespuesta? new Date(element.horaDeContrarespuesta).toLocaleString(): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.contrarespuesta? element.contrarespuesta: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.ruta? element.ruta.ruta: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.movil? element.movil: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.supervisore? element.supervisore.zona: '-'}`;
+                        html += '    </td>';
+                        html += '</tr>';
+                    });
+
+                    table.innerHTML = html;
+                } else {
+                    let res = JSON.parse(dataRequest.response);
+                    alert(JSON.stringify(res.err));
+                }
+            }
+        };
+
+        dataRequest.open('GET', 'penalties', true);
+        dataRequest.setRequestHeader('token', token);
+        dataRequest.setRequestHeader('Content-Type', 'application/json');
+        dataRequest.send();
+    </script>
+
+</body>
+
+</html>

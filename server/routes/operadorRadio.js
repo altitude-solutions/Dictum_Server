@@ -12,6 +12,8 @@
 
 const express = require('express');
 const app = express();
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 // ===============================================
 // Middlewares
@@ -22,6 +24,11 @@ const { verifyToken } = require('../middlewares/authentication');
 // Operador de radio related models
 // ===============================================
 const { RegistroDeHorarios, CicloDeHorarios, RegistroDeDatos_OR, RegistroDePenalidades, ListaDeDatos_OR } = require('../Models/OperadorDeRadio');
+const { Ruta } = require('../Models/Ruta');
+const { Vehiculo } = require('../Models/Vehicle');
+const { Personal, Supervisor } = require('../Models/Personal');
+const { Usuario } = require('../Models/User');
+
 
 
 // ===============================================
@@ -110,6 +117,53 @@ app.post('/penalties', verifyToken, (req, res) => {
 });
 
 // ===============================================
+// Get last 31 days penalties
+// ===============================================
+app.get('/penalties', verifyToken, (req, res) => {
+    let offset = req.query.from || 0;
+    let limit = req.query.to || 1000;
+    let today = new Date();
+    let lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate(), 0, 0, 0, 0);
+    let where = {
+        horaDeRecepcion: {
+            [Op.gte]: lastMonth.getTime()
+        }
+    };
+    let user = req.user;
+    if (user.permisos.includes('or_leer')) {
+        RegistroDePenalidades.findAndCountAll({
+            offset,
+            limit,
+            where,
+            include: [{
+                model: Ruta
+            }, {
+                model: Vehiculo
+            }, {
+                model: Supervisor
+            }, {
+                model: Usuario
+            }]
+        }).then(reply => {
+            res.json({
+                registros: reply.rows,
+                count: reply.count
+            })
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
 // Create Registro de Horarios
 // ===============================================
 app.post('/registroDeHorarios', verifyToken, (req, res) => {
@@ -150,6 +204,57 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
         res.json({
             ok: true
         });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get last 31 days of Regitro de hoarios
+// ===============================================
+app.get('/registroDeHorarios', verifyToken, (req, res) => {
+    let offset = req.query.from || 0;
+    let limit = req.query.to || 1000;
+    let today = new Date();
+    let lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate(), 0, 0, 0, 0);
+    let where = {
+        salidaBase: {
+            [Op.gte]: lastMonth.getTime()
+        }
+    };
+    let user = req.user;
+    if (user.permisos.includes('or_leer')) {
+        CicloDeHorarios.findAndCountAll({
+            offset,
+            limit,
+            where,
+            include: [{
+                model: RegistroDeHorarios,
+                include: [{
+                    model: Vehiculo
+                }, {
+                    model: Usuario
+                }, {
+                    model: Personal
+                }, {
+                    model: Ruta
+                }]
+            }]
+        }).then(reply => {
+            res.json({
+                registros: reply.rows,
+                count: reply.count
+            })
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+
     } else {
         res.status(403).json({
             err: {
@@ -210,6 +315,48 @@ app.post('/registroDeDatos', verifyToken, (req, res) => {
         //             err
         //         });
         //     });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+// ===============================================
+// Get last 31 days of registro de datos
+// ===============================================
+app.get('/registroDeDatos', verifyToken, (req, res) => {
+    let offset = req.query.from || 0;
+    let limit = req.query.to || 1000;
+    let today = new Date();
+    let lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate(), 0, 0, 0, 0);
+    let where = {
+        horaDeRecepcion: {
+            [Op.gte]: lastMonth.getTime()
+        }
+    };
+    let user = req.user;
+    if (user.permisos.includes('or_leer')) {
+        RegistroDeDatos_OR.findAndCountAll({
+            offset,
+            limit,
+            where,
+            include: {
+                all: true
+            }
+        }).then(reply => {
+            res.json({
+                registros: reply.rows,
+                count: reply.count
+            })
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+
     } else {
         res.status(403).json({
             err: {

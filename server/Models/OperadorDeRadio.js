@@ -110,9 +110,12 @@ CicloDeHorarios.init({
     tableName: 'ciclo_de_horarios'
 });
 
-RegistroDeHorarios.hasMany(CicloDeHorarios, {
+CicloDeHorarios.belongsTo(RegistroDeHorarios, {
     foreignKey: 'parent'
 });
+// RegistroDeHorarios.hasMany(CicloDeHorarios, {
+//     foreignKey: 'parent'
+// });
 
 
 // ===============================================
@@ -265,11 +268,13 @@ RegistroDeDatos_OR.belongsTo(ListaDeDatos_OR, {
 });
 
 RegistroDeDatos_OR.belongsTo(Personal, {
-    foreignKey: 'responsableComunicacion'
+    foreignKey: 'responsableComunicacion',
+    as: 'resCom'
 });
 
 RegistroDeDatos_OR.belongsTo(Personal, {
-    foreignKey: 'responsableEjecucion'
+    foreignKey: 'responsableEjecucion',
+    as: 'resEje'
 });
 
 RegistroDeDatos_OR.belongsTo(Supervisor, {

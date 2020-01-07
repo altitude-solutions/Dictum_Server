@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Datos LPL</title>
+</head>
+
+<body>
+
+    <h1 style="text-align: center;">Menú</h1>
+    <div id="menu">
+        <ul>
+            <li>
+                <h2><a href="horarios.html">Registro de Horarios</a></h2>
+            </li>
+            <li>
+                <h2><a href="penalidades.html">Registro de Penalidades</a></h2>
+            </li>
+            <li>
+                <h2><a href="datos.html">Registro de Datos</a></h2>
+            </li>
+        </ul>
+    </div>
+
+    <script>
+        function getRequest() {
+            try {
+                var request = new XMLHttpRequest();
+            } catch (err) {
+                try {
+                    var request = ActiveXObject('Msxm12.XMLHTTP');
+                } catch (err2) {
+                    try {
+                        var request = ActiveXObject('Microsoft.EXMLHTTP');
+                    } catch (err3) {
+                        var request = false;
+                    }
+                }
+            }
+            return request;
+        }
+
+        let html = '';
+        let table = document.getElementById('table');
+
+        let token;
+        if (!sessionStorage.getItem('token')) {
+            let loggedIn = false;
+            while (!loggedIn) {
+                let userName = "";
+                while (!userName) {
+                    userName = prompt("Nombre de usuario", "");
+                }
+
+                let password = "";
+                while (!password) {
+                    password = prompt("Contraseña", "");
+                }
+
+                let loginRequest = getRequest();
+
+                loginRequest.onreadystatechange = () => {
+                    if (loginRequest.readyState == 4) {
+                        if (loginRequest.status == 200) {
+                            let res = JSON.parse(loginRequest.response);
+                            token = res.token;
+                            sessionStorage.setItem('token', token);
+                            loggedIn = true;
+                        } else {
+                            let res = JSON.parse(loginRequest.response);
+                            alert(res.err.message);
+                        }
+                    }
+                };
+                let body = {
+                    nombreUsuario: userName,
+                    contra: password
+                };
+
+                loginRequest.open('POST', '/login', false);
+                loginRequest.setRequestHeader('Content-Type', 'application/json');
+                loginRequest.send(JSON.stringify(body));
+            }
+        } else {
+            token = sessionStorage.getItem('token');
+        }
+    </script>
+
+</body>
+
+</html>

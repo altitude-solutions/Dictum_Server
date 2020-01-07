@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Datos LPL</title>
+</head>
+
+<body>
+
+    <h1 style="text-align: center;">Registro de Datos</h1>
+    <table id="table" border="1">
+
+    </table>
+
+    <script>
+        function getRequest() {
+            try {
+                var request = new XMLHttpRequest();
+            } catch (err) {
+                try {
+                    var request = ActiveXObject('Msxm12.XMLHTTP');
+                } catch (err2) {
+                    try {
+                        var request = ActiveXObject('Microsoft.EXMLHTTP');
+                    } catch (err3) {
+                        var request = false;
+                    }
+                }
+            }
+            return request;
+        }
+
+        let html = '';
+        let table = document.getElementById('table');
+
+        // table headers
+        html += '<tr>';
+        html += '    <td>';
+        html += '        ID registro';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        ID diario';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Sigma de recepción';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de recepción';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Zona';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Dirección';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Cantidad de Poda';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Detalle';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Comentarios';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Tipo de Contenedor';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Codigo de Contenedor';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Mantenimiento';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de comunicación';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Responsable de comunicación';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de ejecución';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Responsable de ejecución';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de verificación';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Supervisor';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Hora de conciliación';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Sigma de conciliación';
+        html += '    </td>';
+        html += '    <td>';
+        html += '        Dato';
+        html += '    </td>';
+        html += '</tr>';
+
+        let token;
+        if (!sessionStorage.getItem('token')) {
+            let loggedIn = false;
+            while (!loggedIn) {
+                let userName = "";
+                while (!userName) {
+                    userName = prompt("Nombre de usuario", "");
+                }
+
+                let password = "";
+                while (!password) {
+                    password = prompt("Contraseña", "");
+                }
+
+                let loginRequest = getRequest();
+
+                loginRequest.onreadystatechange = () => {
+                    if (loginRequest.readyState == 4) {
+                        if (loginRequest.status == 200) {
+                            let res = JSON.parse(loginRequest.response);
+                            token = res.token;
+                            sessionStorage.setItem('token', token);
+                            loggedIn = true;
+                        } else {
+                            let res = JSON.parse(loginRequest.response);
+                            alert(res.err.message);
+                        }
+                    }
+                };
+                let body = {
+                    nombreUsuario: userName,
+                    contra: password
+                };
+
+                loginRequest.open('POST', '/login', false);
+                loginRequest.setRequestHeader('Content-Type', 'application/json');
+                loginRequest.send(JSON.stringify(body));
+            }
+        } else {
+            token = sessionStorage.getItem('token');
+        }
+        let dataRequest = getRequest();
+
+        dataRequest.onreadystatechange = () => {
+            if (dataRequest.readyState == 4) {
+                if (dataRequest.status == 200) {
+                    let res = JSON.parse(dataRequest.response);
+                    console.log(res);
+                    let regs = res.registros;
+                    let counter = 0;
+                    regs.forEach(element => {
+                        if (counter % 2 == 0) {
+                            html += '<tr bgcolor="#b7e1df">';
+                        } else {
+                            html += '<tr>';
+                        }
+                        counter++;
+                        html += '    <td>';
+                        html += `        ${element.id}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.idDiario? element.idDiario: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.sigmaDeRecepcion? element.sigmaDeRecepcion: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaDeRecepcion? new Date(element.horaDeRecepcion).toLocaleString(): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.zona? element.zona: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.direccion? element.direccion: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.cantidadPoda? element.cantidadPoda: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.detalle? element.detalle: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.comentarios? element.comentarios: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.tipoDeContenedor? element.tipoDeContenedor: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.codigoDeContenedor? element.codigoDeContenedor: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.Mantenimento? element.Mantenimento: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaComunicacion? new Date(element.horaComunicacion).toLocaleString(): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        if (element.resCom) {
+                            html += `        ${element.resCom.idPersonal}-${element.resCom.nombre}`;
+                        } else {
+                            html += `        -`;
+                        }
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaEjecucion? new Date(element.horaEjecucion).toLocaleString(): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        if (element.resEje) {
+                            html += `        ${element.resEje.idPersonal}-${element.resEje.nombre}`;
+                        } else {
+                            html += `        -`;
+                        }
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaVerificacion? new Date(element.horaVerificacion).toLocaleString(): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.supervisore? element.supervisore.zona: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.horaConciliacion? new Date(element.horaConciliacion).toLocaleString(): '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.sigmaDeConciliacion? element.sigmaDeConciliacion: '-'}`;
+                        html += '    </td>';
+                        html += '    <td>';
+                        html += `        ${element.lista_de_datos_or? element.lista_de_datos_or.dato: '-'}`;
+                        html += '    </td>';
+                        html += '</tr>';
+
+                    });
+
+                    table.innerHTML = html;
+                } else {
+                    let res = JSON.parse(dataRequest.response);
+                    alert(JSON.stringify(res.err));
+                }
+            }
+        };
+
+        dataRequest.open('GET', 'registroDeDatos', true);
+        dataRequest.setRequestHeader('token', token);
+        dataRequest.setRequestHeader('Content-Type', 'application/json');
+        dataRequest.send();
+    </script>
+
+</body>
+
+</html>

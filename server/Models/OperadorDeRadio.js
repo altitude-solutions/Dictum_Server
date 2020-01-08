@@ -209,7 +209,7 @@ RegistroDeDatos_OR.init({
         autoIncrement: true
     },
     idDiario: {
-        type: DataTypes.INTEGER
+        type: DataTypes.STRING
     },
     sigmaDeRecepcion: {
         type: DataTypes.STRING

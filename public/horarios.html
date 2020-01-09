@@ -92,125 +92,90 @@
 
         let token;
         if (!sessionStorage.getItem('token')) {
-            let loggedIn = false;
-            while (!loggedIn) {
-                let userName = "";
-                while (!userName) {
-                    userName = prompt("Nombre de usuario", "");
-                }
-
-                let password = "";
-                while (!password) {
-                    password = prompt("Contraseña", "");
-                }
-
-                let loginRequest = getRequest();
-
-                loginRequest.onreadystatechange = () => {
-                    if (loginRequest.readyState == 4) {
-                        if (loginRequest.status == 200) {
-                            let res = JSON.parse(loginRequest.response);
-                            token = res.token;
-                            sessionStorage.setItem('token', token);
-                            loggedIn = true;
-                        } else {
-                            let res = JSON.parse(loginRequest.response);
-                            alert(res.err.message);
-                        }
-                    }
-                };
-                let body = {
-                    nombreUsuario: userName,
-                    contra: password
-                };
-
-                loginRequest.open('POST', '/login', false);
-                loginRequest.setRequestHeader('Content-Type', 'application/json');
-                loginRequest.send(JSON.stringify(body));
-            }
+            window.location = "/";
         } else {
             token = sessionStorage.getItem('token');
-        }
-        let dataRequest = getRequest();
+            let dataRequest = getRequest();
 
-        dataRequest.onreadystatechange = () => {
-            if (dataRequest.readyState == 4) {
-                if (dataRequest.status == 200) {
-                    let res = JSON.parse(dataRequest.response);
-                    // console.log(res);
-                    let regs = res.registros;
-                    let counter = 0;
-                    regs.forEach(element => {
-                        if (counter % 2 == 0) {
-                            html += '<tr bgcolor="#b7e1df">';
-                        } else {
-                            html += '<tr>';
-                        }
-                        counter++;
-                        html += '    <td>';
-                        html += `        ${element.registro_de_horario.movil? element.registro_de_horario.movil: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.registro_de_horario.ayudantes? element.registro_de_horario.ayudantes: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.registro_de_horario.ruta? element.registro_de_horario.ruta.ruta: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        if (element.registro_de_horario.personal) {
-                            html += `        ${element.registro_de_horario.personal.idPersonal}-${element.registro_de_horario.personal.nombre}`;
-                        } else {
-                            html += `        -`;
-                        }
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.salidaBase? formatTime(new Date(element.salidaBase)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.inicioRuta? formatTime(new Date(element.inicioRuta)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.finRuta? formatTime(new Date(element.finRuta)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.abandonoRuta? formatTime(new Date(element.abandonoRuta)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.salidaRelleno? formatTime(new Date(element.salidaRelleno)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.ingresoRelleno? formatTime(new Date(element.ingresoRelleno)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.inicioAlmuerzo? formatTime(new Date(element.inicioAlmuerzo)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.finalAlmuerzo? formatTime(new Date(element.finalAlmuerzo)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.regresoBase? formatTime(new Date(element.regresoBase)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.comentarios? element.comentarios: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.modificaciones? element.modificaciones: '-'}`;
-                        html += '    </td>';
-                        html += '</tr>';
-                    });
+            dataRequest.onreadystatechange = () => {
+                if (dataRequest.readyState == 4) {
+                    if (dataRequest.status == 200) {
+                        let res = JSON.parse(dataRequest.response);
+                        // console.log(res);
+                        let regs = res.registros;
+                        let counter = 0;
+                        regs.forEach(element => {
+                            if (counter % 2 == 0) {
+                                html += '<tr bgcolor="#b7e1df">';
+                            } else {
+                                html += '<tr>';
+                            }
+                            counter++;
+                            html += '    <td>';
+                            html += `        ${element.registro_de_horario.movil? element.registro_de_horario.movil: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.registro_de_horario.ayudantes? element.registro_de_horario.ayudantes: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.registro_de_horario.ruta? element.registro_de_horario.ruta.ruta: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            if (element.registro_de_horario.personal) {
+                                html += `        ${element.registro_de_horario.personal.idPersonal}-${element.registro_de_horario.personal.nombre}`;
+                            } else {
+                                html += `        -`;
+                            }
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.salidaBase? formatTime(new Date(element.salidaBase)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.inicioRuta? formatTime(new Date(element.inicioRuta)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.finRuta? formatTime(new Date(element.finRuta)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.abandonoRuta? formatTime(new Date(element.abandonoRuta)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.salidaRelleno? formatTime(new Date(element.salidaRelleno)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.ingresoRelleno? formatTime(new Date(element.ingresoRelleno)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.inicioAlmuerzo? formatTime(new Date(element.inicioAlmuerzo)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.finalAlmuerzo? formatTime(new Date(element.finalAlmuerzo)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.regresoBase? formatTime(new Date(element.regresoBase)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.comentarios? element.comentarios: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.modificaciones? element.modificaciones: '-'}`;
+                            html += '    </td>';
+                            html += '</tr>';
+                        });
 
-                    table.innerHTML = html;
-                } else {
-                    let res = JSON.parse(dataRequest.response);
-                    alert(JSON.stringify(res.err));
+                        table.innerHTML = html;
+                    } else {
+                        let res = JSON.parse(dataRequest.response);
+                        alert(JSON.stringify(res.err));
+                    }
                 }
-            }
-        };
+            };
 
-        dataRequest.open('GET', 'registroDeHorarios', true);
-        dataRequest.setRequestHeader('token', token);
-        dataRequest.setRequestHeader('Content-Type', 'application/json');
-        dataRequest.send();
+            dataRequest.open('GET', 'registroDeHorarios', true);
+            dataRequest.setRequestHeader('token', token);
+            dataRequest.setRequestHeader('Content-Type', 'application/json');
+            dataRequest.send();
+        }
     </script>
 
 </body>

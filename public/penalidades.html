@@ -89,115 +89,80 @@
 
         let token;
         if (!sessionStorage.getItem('token')) {
-            let loggedIn = false;
-            while (!loggedIn) {
-                let userName = "";
-                while (!userName) {
-                    userName = prompt("Nombre de usuario", "");
-                }
-
-                let password = "";
-                while (!password) {
-                    password = prompt("Contraseña", "");
-                }
-
-                let loginRequest = getRequest();
-
-                loginRequest.onreadystatechange = () => {
-                    if (loginRequest.readyState == 4) {
-                        if (loginRequest.status == 200) {
-                            let res = JSON.parse(loginRequest.response);
-                            token = res.token;
-                            sessionStorage.setItem('token', token);
-                            loggedIn = true;
-                        } else {
-                            let res = JSON.parse(loginRequest.response);
-                            alert(res.err.message);
-                        }
-                    }
-                };
-                let body = {
-                    nombreUsuario: userName,
-                    contra: password
-                };
-
-                loginRequest.open('POST', '/login', false);
-                loginRequest.setRequestHeader('Content-Type', 'application/json');
-                loginRequest.send(JSON.stringify(body));
-            }
+            window.location = "/";
         } else {
             token = sessionStorage.getItem('token');
-        }
-        let dataRequest = getRequest();
+            let dataRequest = getRequest();
 
-        dataRequest.onreadystatechange = () => {
-            if (dataRequest.readyState == 4) {
-                if (dataRequest.status == 200) {
-                    let res = JSON.parse(dataRequest.response);
-                    // console.log(res);
-                    let regs = res.registros;
-                    let counter = 0;
-                    regs.forEach(element => {
-                        if (counter % 2 == 0) {
-                            html += '<tr bgcolor="#b7e1df">';
-                        } else {
-                            html += '<tr>';
-                        }
-                        counter++;
-                        html += '    <td>';
-                        html += `        ${element.item? element.item: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.tipoDePenalidad? element.tipoDePenalidad: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.sigma? element.sigma: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.ruta? element.ruta.ruta: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.movil? element.movil: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.detalle? element.detalle: '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.horaDeRecepcion? formatTime(new Date(element.horaDeRecepcion)): '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.supervisore ? element.supervisore.zona : '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.respuesta ? element.respuesta : '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.horaDeRespuesta ? formatTime(new Date(element.horaDeRespuesta)) : '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.contrarespuesta ? element.contrarespuesta : '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.horaDeContrarespuesta ? formatTime(new Date(element.horaDeContrarespuesta)) : '-'}`;
-                        html += '    </td>';
-                        html += '    <td>';
-                        html += `        ${element.comentarios ? element.comentarios : '-'}`;
-                        html += '    </td>';
-                        html += '</tr>';
-                    });
+            dataRequest.onreadystatechange = () => {
+                if (dataRequest.readyState == 4) {
+                    if (dataRequest.status == 200) {
+                        let res = JSON.parse(dataRequest.response);
+                        // console.log(res);
+                        let regs = res.registros;
+                        let counter = 0;
+                        regs.forEach(element => {
+                            if (counter % 2 == 0) {
+                                html += '<tr bgcolor="#b7e1df">';
+                            } else {
+                                html += '<tr>';
+                            }
+                            counter++;
+                            html += '    <td>';
+                            html += `        ${element.item? element.item: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.tipoDePenalidad? element.tipoDePenalidad: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.sigma? element.sigma: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.ruta? element.ruta.ruta: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.movil? element.movil: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.detalle? element.detalle: '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.horaDeRecepcion? formatTime(new Date(element.horaDeRecepcion)): '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.supervisore ? element.supervisore.zona : '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.respuesta ? element.respuesta : '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.horaDeRespuesta ? formatTime(new Date(element.horaDeRespuesta)) : '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.contrarespuesta ? element.contrarespuesta : '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.horaDeContrarespuesta ? formatTime(new Date(element.horaDeContrarespuesta)) : '-'}`;
+                            html += '    </td>';
+                            html += '    <td>';
+                            html += `        ${element.comentarios ? element.comentarios : '-'}`;
+                            html += '    </td>';
+                            html += '</tr>';
+                        });
 
-                    table.innerHTML = html;
-                } else {
-                    let res = JSON.parse(dataRequest.response);
-                    alert(JSON.stringify(res.err));
+                        table.innerHTML = html;
+                    } else {
+                        let res = JSON.parse(dataRequest.response);
+                        alert(JSON.stringify(res.err));
+                    }
                 }
-            }
-        };
+            };
 
-        dataRequest.open('GET', 'penalties', true);
-        dataRequest.setRequestHeader('token', token);
-        dataRequest.setRequestHeader('Content-Type', 'application/json');
-        dataRequest.send();
+            dataRequest.open('GET', 'penalties', true);
+            dataRequest.setRequestHeader('token', token);
+            dataRequest.setRequestHeader('Content-Type', 'application/json');
+            dataRequest.send();
+        }
     </script>
 
 </body>

@@ -6,24 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Datos LPL</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 
 <body>
-
-    <h1 style="text-align: center;">Menú</h1>
-    <div id="menu">
-        <ul>
-            <li>
-                <h2><a href="horarios.html">Registro de Horarios</a></h2>
-            </li>
-            <li>
-                <h2><a href="penalidades.html">Registro de Penalidades</a></h2>
-            </li>
-            <li>
-                <h2><a href="datos.html">Registro de Datos</a></h2>
-            </li>
-        </ul>
+    <div class="mt-4 col-3 ml-auto mr-auto" id="content">
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
     <script>
         function getRequest() {
@@ -44,20 +36,47 @@
         }
 
         let html = '';
-        let table = document.getElementById('table');
 
         let token;
         if (!sessionStorage.getItem('token')) {
-            let loggedIn = false;
-            while (!loggedIn) {
-                let userName = "";
-                while (!userName) {
-                    userName = prompt("Nombre de usuario", "");
-                }
+            html += '<h3>Iniciar sesión</h3>';
+            html += '<div class="input-group mb-3">';
+            html += '    <div class="input-group-prepend">';
+            html += '        <label class="input-group-text" for="userName">Nombre de usuario</label>';
+            html += '    </div>';
+            html += '    <input id="userName" type="text" class="form-control" placeholder="Nombre de usuario" aria-label="Nombre de usuario" aria-describedby="basic-addon1">';
+            html += '</div>';
+            html += '<div class="input-group mb-3">';
+            html += '    <div class="input-group-prepend">';
+            html += '        <label class="input-group-text" for="password">Contraseña</label>';
+            html += '    </div>';
+            html += '    <input id="password" type="password" class="form-control" placeholder="Contraseña" aria-label="Contraseña" aria-describedby="basic-addon1">';
+            html += '</div>';
+            html += '<button class="btn btn-dark" id="loginButton">Iniciar sesión</button>';
+            $('#content').html(html);
 
-                let password = "";
-                while (!password) {
-                    password = prompt("Contraseña", "");
+            $('#userName').focus();
+
+            $('#password').keydown((e) => {
+                if (e.key == 'Enter')
+                    $('#loginButton').click();
+            });
+
+            $('#userName').keydown((e) => {
+                if (e.key == 'Enter')
+                    $('#loginButton').click();
+            });
+
+            document.getElementById('loginButton').addEventListener('click', () => {
+                if ($('#userName').val() == '') {
+                    $('#userName').focus();
+                    alert('El nombre de usuario es necesario');
+                    return;
+                }
+                if ($('#password').val() == '') {
+                    $('#password').focus();
+                    alert('La contraseña es necesaria');
+                    return;
                 }
 
                 let loginRequest = getRequest();
@@ -68,7 +87,25 @@
                             let res = JSON.parse(loginRequest.response);
                             token = res.token;
                             sessionStorage.setItem('token', token);
-                            loggedIn = true;
+
+                            let loggedHtml = '';
+
+                            loggedHtml += '<h1 style="text-align: center;">Operador de Radio</h1>';
+                            loggedHtml += '<div id="menu">';
+                            loggedHtml += '    <ul>';
+                            loggedHtml += '        <li>';
+                            loggedHtml += '            <h2><a href="horarios.html">Registro de Horarios</a></h2>';
+                            loggedHtml += '        </li>';
+                            loggedHtml += '        <li>';
+                            loggedHtml += '            <h2><a href="penalidades.html">Registro de Penalidades</a></h2>';
+                            loggedHtml += '        </li>';
+                            loggedHtml += '        <li>';
+                            loggedHtml += '            <h2><a href="datos.html">Registro de Datos</a></h2>';
+                            loggedHtml += '        </li>';
+                            loggedHtml += '    </ul>';
+                            loggedHtml += '</div>';
+
+                            $('#content').html(loggedHtml);
                         } else {
                             let res = JSON.parse(loginRequest.response);
                             alert(res.err.message);
@@ -76,16 +113,33 @@
                     }
                 };
                 let body = {
-                    nombreUsuario: userName,
-                    contra: password
+                    nombreUsuario: $('#userName').val(),
+                    contra: $('#password').val()
                 };
 
                 loginRequest.open('POST', '/login', false);
                 loginRequest.setRequestHeader('Content-Type', 'application/json');
                 loginRequest.send(JSON.stringify(body));
-            }
+            });
         } else {
             token = sessionStorage.getItem('token');
+
+            html += '<h1 style="text-align: center;">Operador de Radio</h1>';
+            html += '<div id="menu">';
+            html += '    <ul>';
+            html += '        <li>';
+            html += '            <h2><a href="horarios.html">Registro de Horarios</a></h2>';
+            html += '        </li>';
+            html += '        <li>';
+            html += '            <h2><a href="penalidades.html">Registro de Penalidades</a></h2>';
+            html += '        </li>';
+            html += '        <li>';
+            html += '            <h2><a href="datos.html">Registro de Datos</a></h2>';
+            html += '        </li>';
+            html += '    </ul>';
+            html += '</div>';
+
+            $('#content').html(html);
         }
     </script>
 

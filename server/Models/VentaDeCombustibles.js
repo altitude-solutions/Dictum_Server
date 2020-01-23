@@ -61,8 +61,6 @@ VentaDeCombustible.belongsTo(Usuario, {
 });
 
 
-sql.sync();
-
 module.exports = {
     VentaDeCombustible
 };

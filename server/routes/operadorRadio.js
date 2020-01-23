@@ -29,8 +29,6 @@ const { Vehiculo } = require('../Models/Vehicle');
 const { Personal, Supervisor } = require('../Models/Personal');
 const { Usuario } = require('../Models/User');
 
-
-
 // ===============================================
 // Get lista de datos
 // ===============================================
@@ -70,43 +68,33 @@ app.post('/penalties', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('or_escribir')) {
         body.forEach(element => {
-            let keys = Object.keys(element);
-            keys.forEach(key => {
-                if (element[key] == '') {
-                    element[key] = null;
-                }
-                if (element['horaDeRecepcion'] == 14400000) {
-                    element['horaDeRecepcion'] = null;
-                }
-                if (element['horaDeRespuesta'] == 14400000) {
-                    element['horaDeRespuesta'] = null;
-                }
-                if (element['horaDeContrarespuesta'] == 14400000) {
-                    element['horaDeContrarespuesta'] = null;
-                }
-            });
+            // let keys = Object.keys(element);
+            // keys.forEach(key => {
+            // if (element[key] == '') {
+            //     element[key] = null;
+            // }
+            // if (element['horaDeRecepcion'] == 14400000) {
+            //     element['horaDeRecepcion'] = null;
+            // }
+            // if (element['horaDeRespuesta'] == 14400000) {
+            //     element['horaDeRespuesta'] = null;
+            // }
+            // if (element['horaDeContrarespuesta'] == 14400000) {
+            //     element['horaDeContrarespuesta'] = null;
+            // }
+            // });
             // console.log(element);
             RegistroDePenalidades.create(element)
                 .then(saved => {
-
+                    console.log(`Penalty id: ${saved.id}`);
                 }).catch(err => {
                     console.log(err);
                 });
         });
+        console.log(`\n${user.realName} has created ${body.length} penalties`);
         res.json({
             ok: true
         });
-
-        // RegistroDePenalidades.create(body)
-        //     .then(saved => {
-        //         res.json({
-        //             penalidad: saved
-        //         });
-        //     }).catch(err => {
-        //         res.status(500).json({
-        //             err
-        //         });
-        //     });
     } else {
         res.status(403).json({
             err: {
@@ -174,21 +162,21 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
             let registro = body[i];
             let horarios = body[i].horarios;
             delete registro.horarios;
-            let registroKeys = Object.keys(registro);
-            registroKeys.forEach(key => {
-                if (registro[key] == '') {
-                    registro[key] = null;
-                }
-            });
+            // let registroKeys = Object.keys(registro);
+            // registroKeys.forEach(key => {
+            //     if (registro[key] == '') {
+            //         registro[key] = null;
+            //     }
+            // });
             RegistroDeHorarios.create(registro)
                 .then(registroDB => {
                     for (let j = 0; j < horarios.length; j++) {
                         let element = horarios[j];
-                        let keys = Object.keys(element);
-                        for (let k = 0; k < keys.length; k++) {
-                            if (element[keys[k]] == 14400000 || element[keys[k]] == '')
-                                element[keys[k]] = null;
-                        }
+                        // let keys = Object.keys(element);
+                        // for (let k = 0; k < keys.length; k++) {
+                        //     if (element[keys[k]] == 14400000 || element[keys[k]] == '')
+                        //         element[keys[k]] = null;
+                        // }
                         element.parent = registroDB.toJSON().id;
                         CicloDeHorarios.create(element)
                             .then(cicloDB => {
@@ -201,6 +189,8 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
                     console.log(err);
                 });
         }
+        console.log(`\n${user.realName} has created ${body.length} registers`);
+        console.log(`\n${user.realName} has created ${body.horarios.length} cycles`);
         res.json({
             ok: true
         });
@@ -217,13 +207,19 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
 // Get last 31 days of Regitro de hoarios
 // ===============================================
 app.get('/registroDeHorarios', verifyToken, (req, res) => {
-    let offset = req.query.from || 0;
-    let limit = req.query.to || 1000;
-    let today = new Date();
-    let lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate(), 0, 0, 0, 0);
+    let offset = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 1000;
+
+    // date filters
+    let fromDate = Number(req.query.fromDate);
+    let toDate = Number(req.query.toDate);
+
     let where = {
         salidaBase: {
-            [Op.gte]: lastMonth.getTime()
+            [Op.and]: {
+                [Op.gte]: fromDate,
+                [Op.lt]: toDate
+            }
         }
     };
     let user = req.user;
@@ -243,12 +239,15 @@ app.get('/registroDeHorarios', verifyToken, (req, res) => {
                 }, {
                     model: Ruta
                 }]
-            }]
+            }],
+            order: [
+                ['salidaBase', 'ASC']
+            ]
         }).then(reply => {
             res.json({
                 registros: reply.rows,
                 count: reply.count
-            })
+            });
         }).catch(err => {
             res.status(500).json({
                 err
@@ -272,28 +271,27 @@ app.post('/registroDeDatos', verifyToken, (req, res) => {
     let user = req.user;
     if (user.permisos.includes('or_escribir')) {
         body.forEach(element => {
-            let keys = Object.keys(element);
-            keys.forEach(key => {
-                if (element[key] == '') {
-                    element[key] = null;
-                }
-                if (element['horaDeRecepcion'] == 14400000) {
-                    element['horaDeRecepcion'] = null;
-                }
-                if (element['horaComunicacion'] == 14400000) {
-                    element['horaComunicacion'] = null;
-                }
-                if (element['horaEjecucion'] == 14400000) {
-                    element['horaEjecucion'] = null;
-                }
-                if (element['horaVerificacion'] == 14400000) {
-                    element['horaVerificacion'] = null;
-                }
-                if (element['horaConciliacion'] == 14400000) {
-                    element['horaConciliacion'] = null;
-                }
-            });
-            //console.log(element);
+            // let keys = Object.keys(element);
+            // keys.forEach(key => {
+            //     if (element[key] == '') {
+            //         element[key] = null;
+            //     }
+            //     if (element['horaDeRecepcion'] == 14400000) {
+            //         element['horaDeRecepcion'] = null;
+            //     }
+            //     if (element['horaComunicacion'] == 14400000) {
+            //         element['horaComunicacion'] = null;
+            //     }
+            //     if (element['horaEjecucion'] == 14400000) {
+            //         element['horaEjecucion'] = null;
+            //     }
+            //     if (element['horaVerificacion'] == 14400000) {
+            //         element['horaVerificacion'] = null;
+            //     }
+            //     if (element['horaConciliacion'] == 14400000) {
+            //         element['horaConciliacion'] = null;
+            //     }
+            // });
             RegistroDeDatos_OR.create(element)
                 .then(saved => {
 
@@ -301,20 +299,10 @@ app.post('/registroDeDatos', verifyToken, (req, res) => {
                     console.log(err);
                 });
         });
+        console.log(`\n${user.realName} has created ${body.length} datos`);
         res.json({
             ok: true
         });
-
-        // RegistroDeDatos_OR.create(body)
-        //     .then(saved => {
-        //         res.json({
-        //             horarios: saved
-        //         });
-        //     }).catch(err => {
-        //         res.status(500).json({
-        //             err
-        //         });
-        //     });
     } else {
         res.status(403).json({
             err: {

@@ -13,7 +13,7 @@ const { Model, DataTypes } = require('sequelize');
 const { sql } = require('../../config/sql');
 
 // ===============================================
-// Externale models
+// External models
 // ===============================================
 const { EmpresaGrupo, EntidadFinanciera } = require('./General');
 const { LineasDeCredito } = require('./LineasDeCredito');
@@ -28,6 +28,9 @@ PlanDePagos.init({
         allowNull: false,
         primaryKey: true,
         autoIncrement: true
+    },
+    tipoOperacion: {
+        type: DataTypes.STRING
     },
     numeroDeContratoOperacion: {
         type: DataTypes.STRING
@@ -81,6 +84,24 @@ PlanDePagos.init({
         type: DataTypes.BIGINT
     },
     montoDesembolso_2: {
+        type: DataTypes.FLOAT
+    },
+    fechaDesembolso_3: {
+        type: DataTypes.BIGINT
+    },
+    montoDesembolso_3: {
+        type: DataTypes.FLOAT
+    },
+    fechaDesembolso_4: {
+        type: DataTypes.BIGINT
+    },
+    montoDesembolso_4: {
+        type: DataTypes.FLOAT
+    },
+    fechaDesembolso_5: {
+        type: DataTypes.BIGINT
+    },
+    montoDesembolso_5: {
         type: DataTypes.FLOAT
     },
     estado: {

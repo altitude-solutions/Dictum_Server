@@ -32,8 +32,20 @@ const { EmpresaGrupo, EntidadFinanciera, TipoDeEntidad } = require('../Models/Fi
 app.post('/entidadFinanciera', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
-    console.log(body);
     if (user.permisos.includes('fin_escribir')) {
+        EntidadFinanciera.create(body)
+            .then(saved => {
+                res.json({
+                    entidadFinanciera: saved
+                });
+            })
+            .catch(err => {
+                if (err) {
+                    return res.status(500).json({
+                        err
+                    });
+                }
+            });
         res.json({
             body
         });
@@ -52,11 +64,25 @@ app.post('/entidadFinanciera', verifyToken, (req, res) => {
 app.get('/entidadFinanciera/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
-    console.log(id);
     if (user.permisos.includes('fin_leer')) {
-        res.json({
-            id
-        });
+        EntidadFinanciera.findByPk(id)
+            .then(entidadFinanciera => {
+                if (!entidadFinanciera) {
+                    return res.status(404).json({
+                        err: {
+                            message: 'Entidad financiera no encontrada'
+                        }
+                    });
+                }
+
+                res.json({
+                    entidadFinanciera
+                });
+            }).catch(err => {
+                res.status(500).json({
+                    err
+                });
+            });
     } else {
         res.status(403).json({
             err: {
@@ -112,10 +138,6 @@ app.put('/entidadFinanciera/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let body = req.body;
     let user = req.user;
-    console.log({
-        id,
-        body
-    });
     if (user.permisos.includes('fin_modificar')) {
         res.json({
             id,
@@ -136,7 +158,6 @@ app.put('/entidadFinanciera/:id', verifyToken, (req, res) => {
 app.delete('/entidadFinanciera/:id', verifyToken, (req, res) => {
     let id = req.params.id;
     let user = req.user;
-    console.log(id);
     if (user.permisos.includes('fin_borrar')) {
         res.json({
             id
@@ -244,7 +265,7 @@ app.post('/lineaDeCredito', verifyToken, (req, res) => {
                         });
                     });
             } else {
-                res.status(404).json({
+                res.status(400).json({
                     err: {
                         message: 'El código de la lÍnea de crédito ya existe'
                     }
@@ -288,7 +309,6 @@ app.get('/lineaDeCredito/:id', verifyToken, (req, res) => {
                     }
                 });
             }
-            // TODO: Populate operaciones de linea de crédito
             res.json({
                 lineaDeCredito: lineaDB
             });
@@ -316,6 +336,9 @@ app.get('/lineaDeCredito', verifyToken, (req, res) => {
     if (req.query.status) {
         let status = Number(req.query.status)
         where.estado = status
+    }
+    if (req.query.entidad) {
+        where.entidad = Number(req.query.entidad);
     }
     let user = req.user;
     if (user.permisos.includes('fin_leer')) {

@@ -38,6 +38,9 @@ LineasDeCredito.init({
     fechaFirma: {
         type: DataTypes.BIGINT
     },
+    fechaVencimiento: {
+        type: DataTypes.BIGINT
+    },
     monto: {
         type: DataTypes.FLOAT
     },

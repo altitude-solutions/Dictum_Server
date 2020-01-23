@@ -6,177 +6,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Datos LPL</title>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/css/nodrag.css">
+    <!-- <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"> -->
 </head>
 
-<body>
+<body class="bg-light">
 
     <h1 style="text-align: center;">Registro de Horarios</h1>
-    <table id="table" border="1">
 
-    </table>
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="itemsPerPage">Filas por página</label>
+                    </div>
+                    <select class="custom-select" id="itemsPerPage">
+                        <option selected value="1">20</option>
+                        <option value="2">40</option>
+                        <option value="3">60</option>
+                        <option value="4">80</option>
+                        <option value="5">100</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="fromDate">Desde</label>
+                    </div>
+                    <input type="date" id="fromDate" aria-label="Last name" class="form-control">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="toDate">Hasta</label>
+                    </div>
+                    <input type="date" id="toDate" aria-label="Last name" class="form-control">
+                </div>
+            </div>
+        </div>
+        <div class="row text-dark">
+            <nav aria-label="Page navigation example" class="ml-auto mr-auto">
+                <ul class="pagination" id="pageNav">
+                    <!-- <li class="page-item">
+                        <a class="page-link text-dark" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link text-light active bg-dark" href="#">
+                            1
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link text-dark" href="#">
+                            2
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link text-dark" href="#">
+                            3
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link text-dark" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li> -->
+                </ul>
+            </nav>
+        </div>
+    </div>
 
-    <script>
-        function getRequest() {
-            try {
-                var request = new XMLHttpRequest();
-            } catch (err) {
-                try {
-                    var request = ActiveXObject('Msxm12.XMLHTTP');
-                } catch (err2) {
-                    try {
-                        var request = ActiveXObject('Microsoft.EXMLHTTP');
-                    } catch (err3) {
-                        var request = false;
-                    }
-                }
-            }
-            return request;
-        }
+    <table id="table" class="table table-bordered"></table>
 
-        function formatTime(date) {
-            return `${date.getDate()<10?'0': ''}${date.getDate()}/${date.getMonth()+1<10? '0': ''}${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()<10?'0': ''}${date.getMinutes()}:${date.getSeconds()<10?'0': ''}${date.getSeconds()}`
-        }
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
 
-        let html = '';
-        let table = document.getElementById('table');
-
-        // table headers
-        html += '<tr>';
-        html += '    <td>';
-        html += '        Móvil';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Ayudantes';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Ruta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Conductor';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Salida Base';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Inicio Ruta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Final Ruta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Abandono Ruta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Salida Relleno';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Ingreso Relleno';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Inicio Almuerzo';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Final Almuerzo';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Regreso Base';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Comentarios';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Modificaciones';
-        html += '    </td>';
-        html += '</tr>';
-
-
-        let token;
-        if (!sessionStorage.getItem('token')) {
-            window.location = "/";
-        } else {
-            token = sessionStorage.getItem('token');
-            let dataRequest = getRequest();
-
-            dataRequest.onreadystatechange = () => {
-                if (dataRequest.readyState == 4) {
-                    if (dataRequest.status == 200) {
-                        let res = JSON.parse(dataRequest.response);
-                        // console.log(res);
-                        let regs = res.registros;
-                        let counter = 0;
-                        regs.forEach(element => {
-                            if (counter % 2 == 0) {
-                                html += '<tr bgcolor="#b7e1df">';
-                            } else {
-                                html += '<tr>';
-                            }
-                            counter++;
-                            html += '    <td>';
-                            html += `        ${element.registro_de_horario.movil? element.registro_de_horario.movil: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.registro_de_horario.ayudantes? element.registro_de_horario.ayudantes: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.registro_de_horario.ruta? element.registro_de_horario.ruta.ruta: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            if (element.registro_de_horario.personal) {
-                                html += `        ${element.registro_de_horario.personal.idPersonal}-${element.registro_de_horario.personal.nombre}`;
-                            } else {
-                                html += `        -`;
-                            }
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.salidaBase? formatTime(new Date(element.salidaBase)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.inicioRuta? formatTime(new Date(element.inicioRuta)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.finRuta? formatTime(new Date(element.finRuta)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.abandonoRuta? formatTime(new Date(element.abandonoRuta)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.salidaRelleno? formatTime(new Date(element.salidaRelleno)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.ingresoRelleno? formatTime(new Date(element.ingresoRelleno)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.inicioAlmuerzo? formatTime(new Date(element.inicioAlmuerzo)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.finalAlmuerzo? formatTime(new Date(element.finalAlmuerzo)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.regresoBase? formatTime(new Date(element.regresoBase)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.comentarios? element.comentarios: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.modificaciones? element.modificaciones: '-'}`;
-                            html += '    </td>';
-                            html += '</tr>';
-                        });
-
-                        table.innerHTML = html;
-                    } else {
-                        let res = JSON.parse(dataRequest.response);
-                        alert(JSON.stringify(res.err));
-                    }
-                }
-            };
-
-            dataRequest.open('GET', 'registroDeHorarios', true);
-            dataRequest.setRequestHeader('token', token);
-            dataRequest.setRequestHeader('Content-Type', 'application/json');
-            dataRequest.send();
-        }
-    </script>
+    <script src="js/horarios.js"></script>
 
 </body>
 

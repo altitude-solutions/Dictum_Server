@@ -63,7 +63,6 @@ OperadorBase.belongsTo(Usuario, {
     foreignKey: 'usuario_id'
 });
 
-
 sql.sync();
 
 module.exports = {

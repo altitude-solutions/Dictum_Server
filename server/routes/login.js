@@ -37,7 +37,7 @@ app.post('/login', (req, res) => {
     }
     // Look for user in the database
     Usuario.findByPk(String(body.nombreUsuario), {
-        attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'contra', 'empresa', 'correo']
+        attributes: ['nombreUsuario', 'permisos', 'nombreReal', 'contra', 'empresa', 'correo', 'estado']
     }).then(DbUser => {
         if (!DbUser) {
             return res.status(403).json({
@@ -47,7 +47,7 @@ app.post('/login', (req, res) => {
             });
         }
 
-        if (DbUser.nombreUsuario != body.nombreUsuario) {
+        if (DbUser.toJSON().nombreUsuario != body.nombreUsuario) {
             return res.status(403).json({
                 err: {
                     message: 'Usuario o contraseña incorrectos'
@@ -55,13 +55,23 @@ app.post('/login', (req, res) => {
             });
         }
 
-        if (!bcrypt.compareSync(body.contra, DbUser.contra)) {
+        if (!bcrypt.compareSync(body.contra, DbUser.toJSON().contra)) {
             return res.status(403).json({
                 err: {
                     message: 'Usuario o contraseña incorrectos'
                 }
             });
         }
+
+        if (!DbUser.toJSON().estado) {
+            return res.status(403).json({
+                err: {
+                    message: 'Usuario o contraseña incorrectos'
+                }
+            });
+        }
+
+
         DbUser.permisos = construirPermisos(DbUser.permisos);
         let token = jwt.sign({
             user: {

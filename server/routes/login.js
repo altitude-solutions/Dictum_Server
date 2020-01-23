@@ -71,7 +71,6 @@ app.post('/login', (req, res) => {
             });
         }
 
-
         DbUser.permisos = construirPermisos(DbUser.permisos);
         let token = jwt.sign({
             user: {
@@ -82,6 +81,7 @@ app.post('/login', (req, res) => {
                 correo: DbUser.correo
             }
         }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
+        // console.log(`${DbUser.nombreUsuario}(${DbUser.nombreReal}) ingresó al sistema: ${new Date().toLocaleString()}`);
         return res.json({
             user: {
                 nombreUsuario: DbUser.nombreUsuario,

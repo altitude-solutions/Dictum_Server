@@ -86,7 +86,7 @@ app.post('/penalties', verifyToken, (req, res) => {
             // console.log(element);
             RegistroDePenalidades.create(element)
                 .then(saved => {
-                    console.log(`Penalty id: ${saved.id}`);
+
                 }).catch(err => {
                     console.log(err);
                 });

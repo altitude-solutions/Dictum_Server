@@ -19,7 +19,7 @@ let today = new Date();
 
 basicPagesFactor = 20;
 let filters = {
-    fromDate: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).getTime(),
+    fromDate: new Date(today.getFullYear(), today.getMonth(), 1, 0, 0, 0, 0).getTime(),
     toDate: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0).getTime() + 86400000,
     itemsPerPage: basicPagesFactor,
     currentPage: 1,
@@ -242,7 +242,7 @@ function render() {
     dataRequest.send();
 }
 
-setDate($('#fromDate'), today);
+setDate($('#fromDate'), new Date(today.getFullYear(), today.getMonth(), 1));
 $('#fromDate').attr('max', `${today.getFullYear()}-${today.getMonth()+1<10? '0': ''}${today.getMonth() + 1}-${today.getDate()<10?'0': ''}${today.getDate()}`);
 setDate($('#toDate'), today);
 $('#toDate').attr('max', `${today.getFullYear()}-${today.getMonth()+1<10? '0': ''}${today.getMonth() + 1}-${today.getDate()<10?'0': ''}${today.getDate()}`);

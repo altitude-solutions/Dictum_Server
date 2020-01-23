@@ -91,7 +91,6 @@ app.post('/penalties', verifyToken, (req, res) => {
                     console.log(err);
                 });
         });
-        console.log(`\n${user.realName} has created ${body.length} penalties`);
         res.json({
             ok: true
         });
@@ -189,8 +188,6 @@ app.post('/registroDeHorarios', verifyToken, (req, res) => {
                     console.log(err);
                 });
         }
-        console.log(`\n${user.realName} has created ${body.length} registers`);
-        console.log(`\n${user.realName} has created ${body.horarios.length} cycles`);
         res.json({
             ok: true
         });
@@ -299,7 +296,6 @@ app.post('/registroDeDatos', verifyToken, (req, res) => {
                     console.log(err);
                 });
         });
-        console.log(`\n${user.realName} has created ${body.length} datos`);
         res.json({
             ok: true
         });

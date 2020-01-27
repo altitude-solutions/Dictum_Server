@@ -81,7 +81,7 @@ app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('fin_escribir')) {
-        if (body.numeroDeCuota && body.fechaDePago && body.montoDelPago && body.parent) {
+        if (body.numeroDeCuota && body.fechaDePago && body.montoTotalDelPago && body.parent) {
             CuotaPlanDePagos.create(body)
                 .then(saved => {
                     res.json({

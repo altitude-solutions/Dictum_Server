@@ -33,7 +33,7 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
     if (user.permisos.includes('es_escribir')) {
         if (body.movil == 'Bidon') {
             VentaDeCombustible.create(body)
-                .then(saved => {
+                .then(savedDB => {
                     res.json({
                         message: 'Guardado',
                         saved: true
@@ -68,7 +68,7 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
                             fechaYHora: maxValue
                         }
                     }).then(lastReg => {
-                        if (Number(body.kilometraje) <= Number(lastReg.toJSON().kilometraje)) {
+                        if (Number(body.kilometraje) >= Number(lastReg.toJSON().kilometraje)) {
                             res.json({
                                 message: `El kilometraje no puede ser menor al kilometraje del anterior registro (${lastReg.toJSON().kilometraje}Km)`,
                                 saved: false

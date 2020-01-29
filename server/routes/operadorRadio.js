@@ -33,8 +33,8 @@ const { Usuario } = require('../Models/User');
 // Get lista de datos
 // ===============================================
 app.get('/listaDeDatos_OR', verifyToken, (req, res) => {
-    let offset = req.query.from || 0;
-    let limit = req.query.to || 1000;
+    let offset = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 1000;
     let user = req.user;
     if (user.permisos.includes('or_leer')) {
         ListaDeDatos_OR.findAndCountAll({
@@ -208,8 +208,8 @@ app.get('/registroDeHorarios', verifyToken, (req, res) => {
     let limit = Number(req.query.to) || 1000;
 
     // date filters
-    let fromDate = Number(req.query.fromDate);
-    let toDate = Number(req.query.toDate);
+    let fromDate = Number(req.query.fromDate) || new Date().getTime();
+    let toDate = Number(req.query.toDate) || new Date().getTime();
 
     let where = {
         salidaBase: {
@@ -312,15 +312,22 @@ app.post('/registroDeDatos', verifyToken, (req, res) => {
 // Get last 31 days of registro de datos
 // ===============================================
 app.get('/registroDeDatos', verifyToken, (req, res) => {
-    let offset = req.query.from || 0;
-    let limit = req.query.to || 1000;
-    let today = new Date();
-    let lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate(), 0, 0, 0, 0);
+    let offset = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 1000;
+
+    // date filters
+    let fromDate = Number(req.query.fromDate) || new Date().getTime();
+    let toDate = Number(req.query.toDate) || new Date().getTime();
+
     let where = {
         horaDeRecepcion: {
-            [Op.gte]: lastMonth.getTime()
+            [Op.and]: {
+                [Op.gte]: fromDate,
+                [Op.lt]: toDate
+            }
         }
     };
+
     let user = req.user;
     if (user.permisos.includes('or_leer')) {
         RegistroDeDatos_OR.findAndCountAll({
@@ -329,7 +336,10 @@ app.get('/registroDeDatos', verifyToken, (req, res) => {
             where,
             include: {
                 all: true
-            }
+            },
+            order: [
+                ['horaDeRecepcion', 'ASC']
+            ]
         }).then(reply => {
             res.json({
                 registros: reply.rows,

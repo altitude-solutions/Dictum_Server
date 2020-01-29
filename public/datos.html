@@ -7,213 +7,61 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Datos LPL</title>
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/nodrag.css">
 </head>
 
-<body>
+<body class="bg-light">
 
     <h1 style="text-align: center;">Registro de Datos</h1>
-    <table id="table" border="1">
 
-    </table>
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="itemsPerPage">Filas por página</label>
+                    </div>
+                    <select class="custom-select" id="itemsPerPage">
+                        <option selected value="1">20</option>
+                        <option value="2">40</option>
+                        <option value="3">60</option>
+                        <option value="4">80</option>
+                        <option value="5">100</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="fromDate">Desde</label>
+                    </div>
+                    <input type="date" id="fromDate" aria-label="Last name" class="form-control">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="toDate">Hasta</label>
+                    </div>
+                    <input type="date" id="toDate" aria-label="Last name" class="form-control">
+                </div>
+            </div>
+        </div>
+        <div class="row text-dark">
+            <nav aria-label="Page navigation example" class="ml-auto mr-auto">
+                <ul class="pagination" id="pageNav">
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <table id="table" class="table table-bordered"></table>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
 
-    <script>
-        function getRequest() {
-            try {
-                var request = new XMLHttpRequest();
-            } catch (err) {
-                try {
-                    var request = ActiveXObject('Msxm12.XMLHTTP');
-                } catch (err2) {
-                    try {
-                        var request = ActiveXObject('Microsoft.EXMLHTTP');
-                    } catch (err3) {
-                        var request = false;
-                    }
-                }
-            }
-            return request;
-        }
-
-        function formatTime(date) {
-            return `${date.getDate()<10?'0': ''}${date.getDate()}/${date.getMonth()+1<10? '0': ''}${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()<10?'0': ''}${date.getMinutes()}:${date.getSeconds()<10?'0': ''}${date.getSeconds()}`
-        }
-
-        let html = '';
-        let table = document.getElementById('table');
-        // table headers
-        html += '<tr>';
-        html += '    <td>';
-        html += '        ID diario';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Dato';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Sigma de recepción';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Zona';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Dirección';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Cantidad de Poda';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Tipo de Contenedor';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Código de Contenedor';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Mantenimiento';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Detalle';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Comentarios';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de recepción';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Responsable de comunicación';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de comunicación';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Responsable de ejecución';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de ejecición';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Supervisor';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de verificacion';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Sigma de conciliación';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de conciliación';
-        html += '    </td>';
-        html += '</tr>';
-
-        let token;
-        if (!sessionStorage.getItem('token')) {
-            window.location = "/";
-        } else {
-            token = sessionStorage.getItem('token');
-            let dataRequest = getRequest();
-
-            dataRequest.onreadystatechange = () => {
-                if (dataRequest.readyState == 4) {
-                    if (dataRequest.status == 200) {
-                        let res = JSON.parse(dataRequest.response);
-                        let regs = res.registros;
-                        let counter = 0;
-                        regs.forEach(element => {
-                            if (counter % 2 == 0) {
-                                html += '<tr bgcolor="#b7e1df">';
-                            } else {
-                                html += '<tr>';
-                            }
-                            counter++;
-                            html += '    <td>';
-                            html += `        ${element.idDiario? element.idDiario: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.lista_de_datos_or? element.lista_de_datos_or.dato: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.sigmaDeRecepcion? element.sigmaDeRecepcion: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.zona? element.zona: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.direccion? element.direccion: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.cantidadPoda? element.cantidadPoda: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.tipoDeContenedor? element.tipoDeContenedor: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.codigoDeContenedor? element.codigoDeContenedor: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.Mantenimento? element.Mantenimento: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.detalle? element.detalle: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.comentarios? element.comentarios: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.horaDeRecepcion? formatTime(new Date(element.horaDeRecepcion)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            if (element.resCom) {
-                                html += `        ${element.resCom.idPersonal}-${element.resCom.nombre}`;
-                            } else {
-                                html += `        -`;
-                            }
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.horaComunicacion? formatTime(new Date(element.horaComunicacion)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            if (element.resEje) {
-                                html += `        ${element.resEje.idPersonal}-${element.resEje.nombre}`;
-                            } else {
-                                html += `        -`;
-                            }
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.horaEjecucion? formatTime(new Date(element.horaEjecucion)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.supervisore? element.supervisore.zona: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.horaVerificacion? formatTime(new Date(element.horaVerificacion)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.sigmaDeConciliacion? element.sigmaDeConciliacion: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.horaConciliacion? formatTime(new Date(element.horaConciliacion)): '-'}`;
-                            html += '    </td>';
-                            html += '</tr>';
-                        });
-
-                        table.innerHTML = html;
-                    } else {
-                        let res = JSON.parse(dataRequest.response);
-                        alert(JSON.stringify(res.err));
-                    }
-                }
-            };
-
-            dataRequest.open('GET', 'registroDeDatos', true);
-            dataRequest.setRequestHeader('token', token);
-            dataRequest.setRequestHeader('Content-Type', 'application/json');
-            dataRequest.send();
-        }
-    </script>
-
+    <script src="js/datos.js"></script>
 </body>
 
 </html>

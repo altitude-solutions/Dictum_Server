@@ -39,10 +39,12 @@ document.getElementById('fromDate').addEventListener('input', () => {
     // 86400000[ms] is equal to 24h
     // 14400000[ms] is equal to 4h
     if ($('#fromDate').val() == '') {
-        let aux = new Date($('#toDate').val()).getTime();
-        let aux_date = new Date(aux + 86400000);
-        filters.fromDate = aux + 14400000;
-        setDate($('#fromDate'), aux_date);
+        // let aux = new Date($('#toDate').val()).getTime();
+        // let aux_date = new Date(aux + 86400000);
+        // filters.fromDate = aux + 14400000;
+        // setDate($('#fromDate'), aux_date);
+        filters.fromDate = new Date(today.getFullYear(), today.getMonth(), 1, 0, 0, 0, 0).getTime();
+        setDate($('#fromDate'), new Date(today.getFullYear(), today.getMonth(), 1));
     } else {
         filters.fromDate = new Date($('#fromDate').val()).getTime() + 14400000;
     }

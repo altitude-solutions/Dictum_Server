@@ -102,7 +102,7 @@ app.post('/login', (req, res) => {
 
 app.post('/recovery', (req, res) => {
     console.log(req.body);
-    res.json({
+    res.status(501).json({
         ok: true
     });
 });

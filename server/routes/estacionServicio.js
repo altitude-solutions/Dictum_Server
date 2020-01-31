@@ -25,7 +25,6 @@ const { VentaDeCombustible } = require('../Models/VentaDeCombustibles');
 app.post('/ventaCombustible', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
-
     // ===============================================
     // Validator to see the latest value
     // select * from venta_de_combustible where movil=${movil} and fechaYHora=(select max(fechaYHora) from venta_de_combustible where movil=${movil});
@@ -68,23 +67,30 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
                             fechaYHora: maxValue
                         }
                     }).then(lastReg => {
-                        if (Number(body.kilometraje) >= Number(lastReg.toJSON().kilometraje)) {
+                        if (Number(body.kilometraje) <= Number(lastReg.toJSON().kilometraje)) {
                             res.json({
-                                message: `El kilometraje no puede ser menor al kilometraje del anterior registro (${lastReg.toJSON().kilometraje}Km)`,
+                                errKm: `El kilometraje no puede ser menor al kilometraje del anterior registro (${lastReg.toJSON().kilometraje}Km)`,
                                 saved: false
                             });
                         } else {
-                            VentaDeCombustible.create(body)
-                                .then(saved => {
-                                    res.json({
-                                        message: 'Guardado',
-                                        saved: true
-                                    });
-                                }).catch(err => {
-                                    res.status(500).json({
-                                        err
-                                    });
+                            if (Number(body.kilometraje) >= (Number(lastReg.toJSON().kilometraje) + 500)) {
+                                res.json({
+                                    errKm: `El recorrido no puede ser mayor a 500Km (${lastReg.toJSON().kilometraje}Km)`,
+                                    saved: false
                                 });
+                            } else {
+                                VentaDeCombustible.create(body)
+                                    .then(saved => {
+                                        res.json({
+                                            message: 'Guardado',
+                                            saved: true
+                                        });
+                                    }).catch(err => {
+                                        res.status(500).json({
+                                            err
+                                        });
+                                    });
+                            }
                         }
                     }).catch(err => {
                         res.status(500).json({
@@ -122,7 +128,10 @@ app.get('/ventaCombustible', verifyToken, (req, res) => {
         VentaDeCombustible.findAndCountAll({
             offset,
             limit,
-            where
+            where,
+            order: [
+                ['fechaYHora', 'ASC']
+            ]
         }).then(reply => {
             res.json({
                 ventas: reply.rows,

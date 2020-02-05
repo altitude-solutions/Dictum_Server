@@ -107,13 +107,19 @@ app.post('/penalties', verifyToken, (req, res) => {
 // Get last 31 days penalties
 // ===============================================
 app.get('/penalties', verifyToken, (req, res) => {
-    let offset = req.query.from || 0;
-    let limit = req.query.to || 1000;
-    let today = new Date();
-    let lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate(), 0, 0, 0, 0);
+    let offset = Number(req.query.from) || 0;
+    let limit = Number(req.query.to) || 1000;
+
+    // date filters
+    let fromDate = Number(req.query.fromDate) || new Date().getTime();
+    let toDate = Number(req.query.toDate) || new Date().getTime();
+
     let where = {
         horaDeRecepcion: {
-            [Op.gte]: lastMonth.getTime()
+            [Op.and]: {
+                [Op.gte]: fromDate,
+                [Op.lt]: toDate
+            }
         }
     };
     let user = req.user;
@@ -130,13 +136,17 @@ app.get('/penalties', verifyToken, (req, res) => {
                 model: Supervisor
             }, {
                 model: Usuario
-            }]
+            }],
+            order: [
+                ['horaDeRecepcion', 'ASC']
+            ]
         }).then(reply => {
             res.json({
                 registros: reply.rows,
                 count: reply.count
             })
         }).catch(err => {
+            console.log(err);
             res.status(500).json({
                 err
             });
@@ -238,6 +248,7 @@ app.get('/registroDeHorarios', verifyToken, (req, res) => {
                 }]
             }],
             order: [
+                ['parent', 'ASC'],
                 ['salidaBase', 'ASC']
             ]
         }).then(reply => {

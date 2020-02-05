@@ -12,164 +12,56 @@
 <body>
 
     <h1 style="text-align: center;">Registro de Penalidades</h1>
-    <table id="table" border="1">
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="itemsPerPage">Filas por página</label>
+                    </div>
+                    <select class="custom-select" id="itemsPerPage">
+                        <option selected value="1">20</option>
+                        <option value="2">40</option>
+                        <option value="3">60</option>
+                        <option value="4">80</option>
+                        <option value="5">100</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="fromDate">Desde</label>
+                    </div>
+                    <input type="date" id="fromDate" aria-label="Last name" class="form-control">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="toDate">Hasta</label>
+                    </div>
+                    <input type="date" id="toDate" aria-label="Last name" class="form-control">
+                </div>
+            </div>
+        </div>
+        <div class="row text-dark">
+            <nav aria-label="Page navigation example" class="ml-auto mr-auto">
+                <ul class="pagination" id="pageNav">
+                </ul>
+            </nav>
+        </div>
+    </div>
 
-    </table>
+    <table id="table" class="table table-bordered"></table>
+
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="bootstrap/js/bootstrap.min.js"></script>
 
 
-    <script>
-        function getRequest() {
-            try {
-                var request = new XMLHttpRequest();
-            } catch (err) {
-                try {
-                    var request = ActiveXObject('Msxm12.XMLHTTP');
-                } catch (err2) {
-                    try {
-                        var request = ActiveXObject('Microsoft.EXMLHTTP');
-                    } catch (err3) {
-                        var request = false;
-                    }
-                }
-            }
-            return request;
-        }
-
-        function formatTime(date) {
-            return `${date.getDate()<10?'0': ''}${date.getDate()}/${date.getMonth()+1<10? '0': ''}${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()<10?'0': ''}${date.getMinutes()}:${date.getSeconds()<10?'0': ''}${date.getSeconds()}`
-        }
-
-        let html = '';
-        let table = document.getElementById('table');
-
-        //item, tipoDePenalidad, sigma, ruta, movil, detalle, horaDeRecepcion,
-        //supervisor, respuesta, horaDeRespuesta, contrarespuesta, horaDeContrarespuesta,
-        //comentarios
-        // table headers
-        html += '<tr>';
-        html += '    <td>';
-        html += '        Item';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Tipo de penalidad';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Sigma';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Ruta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Móvil';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Detalle';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de Recepción';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Supervisor';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Respuesta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de respuesta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Contra-respuesta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Hora de contra-respuesta';
-        html += '    </td>';
-        html += '    <td>';
-        html += '        Comentarios';
-        html += '    </td>';
-        html += '</tr>';
-
-
-        let token;
-        if (!sessionStorage.getItem('token')) {
-            window.location = "/";
-        } else {
-            token = sessionStorage.getItem('token');
-            let dataRequest = getRequest();
-
-            dataRequest.onreadystatechange = () => {
-                if (dataRequest.readyState == 4) {
-                    if (dataRequest.status == 200) {
-                        let res = JSON.parse(dataRequest.response);
-                        // console.log(res);
-                        let regs = res.registros;
-                        let counter = 0;
-                        regs.forEach(element => {
-                            if (counter % 2 == 0) {
-                                html += '<tr bgcolor="#b7e1df">';
-                            } else {
-                                html += '<tr>';
-                            }
-                            counter++;
-                            html += '    <td>';
-                            html += `        ${element.item? element.item: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.tipoDePenalidad? element.tipoDePenalidad: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.sigma? element.sigma: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.ruta? element.ruta.ruta: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.movil? element.movil: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.detalle? element.detalle: '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.horaDeRecepcion? formatTime(new Date(element.horaDeRecepcion)): '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.supervisore ? element.supervisore.zona : '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.respuesta ? element.respuesta : '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.horaDeRespuesta ? formatTime(new Date(element.horaDeRespuesta)) : '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.contrarespuesta ? element.contrarespuesta : '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.horaDeContrarespuesta ? formatTime(new Date(element.horaDeContrarespuesta)) : '-'}`;
-                            html += '    </td>';
-                            html += '    <td>';
-                            html += `        ${element.comentarios ? element.comentarios : '-'}`;
-                            html += '    </td>';
-                            html += '</tr>';
-                        });
-
-                        table.innerHTML = html;
-                    } else {
-                        let res = JSON.parse(dataRequest.response);
-                        alert(JSON.stringify(res.err));
-                    }
-                }
-            };
-
-            dataRequest.open('GET', 'penalties', true);
-            dataRequest.setRequestHeader('token', token);
-            dataRequest.setRequestHeader('Content-Type', 'application/json');
-            dataRequest.send();
-        }
-    </script>
+    <script src="./js/penalidades.js"></script>
 
 </body>
 

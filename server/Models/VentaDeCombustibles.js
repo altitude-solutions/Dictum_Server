@@ -44,6 +44,9 @@ VentaDeCombustible.init({
     },
     kilometraje: {
         type: DataTypes.FLOAT
+    },
+    comentarios: {
+        type: DataTypes.STRING(1023)
     }
 }, {
     tableName: 'venta_de_combustible',

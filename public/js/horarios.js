@@ -82,6 +82,7 @@ function render() {
             if (dataRequest.status == 200) {
                 let res = JSON.parse(dataRequest.response);
                 let regs = res.registros;
+                console.log(regs);
                 let counter = 0;
                 // Table headers
                 html += '<thead class="thead-dark">';

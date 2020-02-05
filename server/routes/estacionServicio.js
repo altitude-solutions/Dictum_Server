@@ -122,7 +122,8 @@ app.get('/ventaCombustible', verifyToken, (req, res) => {
     let where = {
         fechaYHora: {
             [Op.gte]: initialDate
-        }
+        },
+        usuario_id: user.nombreUsuario // Just to show current user activity
     };
     if (user.permisos.includes('es_leer')) {
         VentaDeCombustible.findAndCountAll({

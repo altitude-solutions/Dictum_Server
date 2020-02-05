@@ -86,26 +86,19 @@ function render() {
                 // Table headers
                 html += '<thead class="thead-dark">';
                 html += '    <tr>';
-                html += '        <th scope="col">ID diario</th>';
-                html += '        <th scope="col">Dato</th>';
-                html += '        <th scope="col">Sigma de recepción</th>';
-                html += '        <th scope="col">Zona</th>';
-                html += '        <th scope="col">Dirección</th>';
-                html += '        <th scope="col">Cantidad de Poda</th>';
-                html += '        <th scope="col">Tipo de Contenedor</th>';
-                html += '        <th scope="col">Código de Contenedor</th>';
-                html += '        <th scope="col">Mantenimiento</th>';
+                html += '        <th scope="col">Item</th>';
+                html += '        <th scope="col">Tipo de penalidad</th>';
+                html += '        <th scope="col">Sigma</th>';
+                html += '        <th scope="col">Ruta</th>';
+                html += '        <th scope="col">Móvil</th>';
                 html += '        <th scope="col">Detalle</th>';
-                html += '        <th scope="col">Comentarios</th>';
-                html += '        <th scope="col">Hora de recepción</th>';
-                html += '        <th scope="col">Responsable de comunicación</th>';
-                html += '        <th scope="col">Hora de comunicación</th>';
-                html += '        <th scope="col">Responsable de ejecución</th>';
-                html += '        <th scope="col">Hora de ejecución</th>';
+                html += '        <th scope="col">Hora de Recepción</th>';
                 html += '        <th scope="col">Supervisor</th>';
-                html += '        <th scope="col">Hora de verificación</th>';
-                html += '        <th scope="col">Sigma de conciliación</th>';
-                html += '        <th scope="col">Hora de conciliación</th>';
+                html += '        <th scope="col">Respuesta</th>';
+                html += '        <th scope="col">Hora de Respuesta</th>';
+                html += '        <th scope="col">Contra-respuesta</th>';
+                html += '        <th scope="col">Hora de Contra-respuesta</th>';
+                html += '        <th scope="col">Comentarios</th>';
                 html += '    </tr>';
                 html += '</thead>';
                 html += '<tbody>'
@@ -117,72 +110,43 @@ function render() {
                     }
                     counter++;
                     html += '    <th scope="row">';
-                    html += `        ${element.idDiario? element.idDiario: '-'}`;
+                    html += `        ${element.item? element.item: '-'}`;
                     html += '    </th>';
                     html += '    <td>';
-                    html += `        ${element.lista_de_datos_or? element.lista_de_datos_or.dato: '-'}`;
+                    html += `        ${element.tipoDePenalidad? element.tipoDePenalidad: '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    html += `        ${element.sigmaDeRecepcion? element.sigmaDeRecepcion: '-'}`;
+                    html += `        ${element.sigma? element.sigma: '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    html += `        ${element.zona? element.zona: '-'}`;
+                    html += `        ${element.ruta? element.ruta.ruta: '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    html += `        ${element.direccion? element.direccion: '-'}`;
-                    html += '    </td>';
-                    html += '    <td>';
-                    html += `        ${element.cantidadPoda? element.cantidadPoda: '-'}`;
-                    html += '    </td>';
-                    html += '    <td>';
-                    html += `        ${element.tipoDeContenedor? element.tipoDeContenedor: '-'}`;
-                    html += '    </td>';
-                    html += '    <td>';
-                    html += `        ${element.codigoDeContenedor? element.codigoDeContenedor: '-'}`;
-                    html += '    </td>';
-                    html += '    <td>';
-                    html += `        ${element.Mantenimento? element.Mantenimento: '-'}`;
+                    html += `        ${element.movil? element.movil: '-'}`;
                     html += '    </td>';
                     html += '    <td>';
                     html += `        ${element.detalle? element.detalle: '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    html += `        ${element.comentarios? element.comentarios: '-'}`;
-                    html += '    </td>';
-                    html += '    <td>';
                     html += `        ${element.horaDeRecepcion? formatTime(new Date(element.horaDeRecepcion)): '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    if (element.resCom) {
-                        html += `        ${element.resCom.idPersonal}-${element.resCom.nombre}`;
-                    } else {
-                        html += `        -`;
-                    }
+                    html += `        ${element.supervisore ? element.supervisore.zona : '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    html += `        ${element.horaComunicacion? formatTime(new Date(element.horaComunicacion)): '-'}`;
+                    html += `        ${element.respuesta ? element.respuesta : '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    if (element.resEje) {
-                        html += `        ${element.resEje.idPersonal}-${element.resEje.nombre}`;
-                    } else {
-                        html += `        -`;
-                    }
+                    html += `        ${element.horaDeRespuesta ? formatTime(new Date(element.horaDeRespuesta)) : '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    html += `        ${element.horaEjecucion? formatTime(new Date(element.horaEjecucion)): '-'}`;
+                    html += `        ${element.contrarespuesta ? element.contrarespuesta : '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    html += `        ${element.supervisore? element.supervisore.zona: '-'}`;
+                    html += `        ${element.horaDeContrarespuesta ? formatTime(new Date(element.horaDeContrarespuesta)) : '-'}`;
                     html += '    </td>';
                     html += '    <td>';
-                    html += `        ${element.horaVerificacion? formatTime(new Date(element.horaVerificacion)): '-'}`;
-                    html += '    </td>';
-                    html += '    <td>';
-                    html += `        ${element.sigmaDeConciliacion? element.sigmaDeConciliacion: '-'}`;
-                    html += '    </td>';
-                    html += '    <td>';
-                    html += `        ${element.horaConciliacion? formatTime(new Date(element.horaConciliacion)): '-'}`;
+                    html += `        ${element.comentarios ? element.comentarios : '-'}`;
                     html += '    </td>';
                     html += '</tr>';
                 });
@@ -256,7 +220,7 @@ function render() {
         }
     };
 
-    dataRequest.open('GET', `registroDeDatos?fromDate=${filters.fromDate}&toDate=${filters.toDate}&from=${(filters.currentPage - 1) * filters.itemsPerPage}&to=${filters.itemsPerPage}`, true);
+    dataRequest.open('GET', `penalties?fromDate=${filters.fromDate}&toDate=${filters.toDate}&from=${(filters.currentPage - 1) * filters.itemsPerPage}&to=${filters.itemsPerPage}`, true);
     dataRequest.setRequestHeader('token', token);
     dataRequest.setRequestHeader('Content-Type', 'application/json');
     dataRequest.send();

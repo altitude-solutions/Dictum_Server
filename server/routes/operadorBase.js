@@ -22,8 +22,17 @@ const { OperadorBase } = require('../Models/OperadorBase');
 app.post('/operadorBase', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
-    // console.log(body);
     if (user.permisos.includes('io_escribir')) {
+
+        // OperadorBase.bulkCreate(body)
+        //     .then(saved => {
+        //         res.json({
+        //             registros: saved
+        //         });
+        //     }).catch(err => {
+        //         console.log(err);
+        //     });
+
         body.forEach(element => {
             let keys = Object.keys(element);
             keys.forEach(key => {

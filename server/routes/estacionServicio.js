@@ -67,13 +67,13 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
                             fechaYHora: maxValue
                         }
                     }).then(lastReg => {
-                        if (Number(body.kilometraje) <= Number(lastReg.toJSON().kilometraje)) {
+                        if (Number(body.kilometraje) < Number(lastReg.toJSON().kilometraje)) {
                             res.json({
                                 errKm: `El kilometraje no puede ser menor al kilometraje del anterior registro (${lastReg.toJSON().kilometraje}Km)`,
                                 saved: false
                             });
                         } else {
-                            if (Number(body.kilometraje) >= (Number(lastReg.toJSON().kilometraje) + 500)) {
+                            if (Number(body.kilometraje) > (Number(lastReg.toJSON().kilometraje) + 500)) {
                                 res.json({
                                     errKm: `El recorrido no puede ser mayor a 500Km (${lastReg.toJSON().kilometraje}Km)`,
                                     saved: false

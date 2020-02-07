@@ -13,6 +13,7 @@ const { sql } = require('../config/sql');
 const { Vehiculo } = require('./Vehicle');
 const { Personal } = require('./Personal');
 const { Usuario } = require('./User');
+const { Ruta } = require('./Ruta');
 const { DataTypes, Model } = require('sequelize');
 
 
@@ -29,6 +30,9 @@ OperadorBase.init({
     },
     kilometrajeEntrada: {
         type: DataTypes.FLOAT
+    },
+    comentarios: {
+        type: DataTypes.STRING(1023)
     },
     fecha: {
         type: DataTypes.BIGINT
@@ -61,6 +65,10 @@ OperadorBase.belongsTo(Personal, {
 
 OperadorBase.belongsTo(Usuario, {
     foreignKey: 'usuario_id'
+});
+
+OperadorBase.belongsTo(Ruta, {
+    foreignKey: 'ruta_id'
 });
 
 sql.sync();

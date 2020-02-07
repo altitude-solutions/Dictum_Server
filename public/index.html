@@ -94,18 +94,33 @@
 
                             let loggedHtml = '';
 
-                            loggedHtml += '<h1 style="text-align: center;">Operador de Radio</h1>';
+                            loggedHtml += '<h1 style="text-align: center;">Reportes LPL</h1>';
                             loggedHtml += '<div id="menu">';
                             loggedHtml += '    <ul>';
-                            loggedHtml += '        <li>';
-                            loggedHtml += '            <h2><a href="horarios.html">Registro de Horarios</a></h2>';
-                            loggedHtml += '        </li>';
-                            loggedHtml += '        <li>';
-                            loggedHtml += '            <h2><a href="penalidades.html">Registro de Penalidades</a></h2>';
-                            loggedHtml += '        </li>';
-                            loggedHtml += '        <li>';
-                            loggedHtml += '            <h2><a href="datos.html">Registro de Datos</a></h2>';
-                            loggedHtml += '        </li>';
+                            loggedHtml += '        <ul>';
+                            loggedHtml += '            <h2>Operador de Radio</h2>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="horarios.html">Registro de Horarios</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="penalidades.html">Registro de Penalidades</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="datos.html">Registro de Datos</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '        </ul>';
+                            loggedHtml += '        <ul>';
+                            loggedHtml += '            <h2>Operador de Base</h2>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="base.html">Registro de Base</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '        </ul>';
+                            loggedHtml += '        <ul>';
+                            loggedHtml += '            <h2>Estación de Servicio</h2>';
+                            loggedHtml += '            <li>';
+                            loggedHtml += '                <h3><a href="estacion_de_servicio.html">Registro de Carga de Combustible</a></h3>';
+                            loggedHtml += '            </li>';
+                            loggedHtml += '        </ul>';
                             loggedHtml += '    </ul>';
                             loggedHtml += '</div>';
 
@@ -128,18 +143,33 @@
         } else {
             token = sessionStorage.getItem('token');
 
-            html += '<h1 style="text-align: center;">Operador de Radio</h1>';
+            html += '<h1 style="text-align: center;">Reportes LPL</h1>';
             html += '<div id="menu">';
             html += '    <ul>';
-            html += '        <li>';
-            html += '            <h2><a href="horarios.html">Registro de Horarios</a></h2>';
-            html += '        </li>';
-            html += '        <li>';
-            html += '            <h2><a href="penalidades.html">Registro de Penalidades</a></h2>';
-            html += '        </li>';
-            html += '        <li>';
-            html += '            <h2><a href="datos.html">Registro de Datos</a></h2>';
-            html += '        </li>';
+            html += '        <ul>';
+            html += '            <h2>Operador de Radio</h2>';
+            html += '            <li>';
+            html += '                <h3><a href="horarios.html">Registro de Horarios</a></h3>';
+            html += '            </li>';
+            html += '            <li>';
+            html += '                <h3><a href="penalidades.html">Registro de Penalidades</a></h3>';
+            html += '            </li>';
+            html += '            <li>';
+            html += '                <h3><a href="datos.html">Registro de Datos</a></h3>';
+            html += '            </li>';
+            html += '        </ul>';
+            html += '        <ul>';
+            html += '            <h2>Operador de Base</h2>';
+            html += '            <li>';
+            html += '                <h3><a href="base.html">Registro de Base</a></h3>';
+            html += '            </li>';
+            html += '        </ul>';
+            html += '        <ul>';
+            html += '            <h2>Estación de Servicio</h2>';
+            html += '            <li>';
+            html += '                <h3><a href="estacion_de_servicio.html">Registro de Carga de Combustible</a></h3>';
+            html += '            </li>';
+            html += '        </ul>';
             html += '    </ul>';
             html += '</div>';
 

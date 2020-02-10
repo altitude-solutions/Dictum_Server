@@ -49,18 +49,22 @@ OperadorBase.belongsTo(Vehiculo, {
 });
 
 OperadorBase.belongsTo(Personal, {
-    foreignKey: 'conductor'
+    foreignKey: 'conductor',
+    as: 'conductor_id'
 })
 OperadorBase.belongsTo(Personal, {
-    foreignKey: 'ayudante_1'
+    foreignKey: 'ayudante_1',
+    as: 'ayudante_1_id'
 });
 
 OperadorBase.belongsTo(Personal, {
-    foreignKey: 'ayudante_2'
+    foreignKey: 'ayudante_2',
+    as: 'ayudante_2_id'
 });
 
 OperadorBase.belongsTo(Personal, {
-    foreignKey: 'ayudante_3'
+    foreignKey: 'ayudante_3',
+    as: 'ayudante_3_id'
 });
 
 OperadorBase.belongsTo(Usuario, {

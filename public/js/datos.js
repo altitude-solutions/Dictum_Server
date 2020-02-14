@@ -49,6 +49,7 @@ document.getElementById('fromDate').addEventListener('input', () => {
         filters.fromDate = new Date($('#fromDate').val()).getTime() + 14400000;
     }
     let date = new Date(filters.fromDate);
+    $('#generateExcel').attr('href', `/reports/registro_de_datos?token=${token}&fromDate=${filters.fromDate}&toDate=${filters.toDate}`);
     $('#toDate').attr('min', `${date.getFullYear()}-${date.getMonth()+1<10? '0': ''}${date.getMonth() + 1}-${date.getDate()<10?'0': ''}${date.getDate()}`);
     filters.currentPage = 1;
     render();
@@ -63,6 +64,7 @@ document.getElementById('toDate').addEventListener('input', () => {
         filters.toDate = new Date($('#toDate').val()).getTime() + 86400000 + 14400000;
     }
     let date = new Date(new Date($('#toDate').val()).getTime() + 86400000);
+    $('#generateExcel').attr('href', `/reports/registro_de_datos?token=${token}&fromDate=${filters.fromDate}&toDate=${filters.toDate}`);
     $('#fromDate').attr('max', `${date.getFullYear()}-${date.getMonth()+1<10? '0': ''}${date.getMonth() + 1}-${date.getDate()<10?'0': ''}${date.getDate()}`);
     filters.currentPage = 1;
     render();
@@ -266,7 +268,7 @@ setDate($('#fromDate'), new Date(today.getFullYear(), today.getMonth(), 1));
 $('#fromDate').attr('max', `${today.getFullYear()}-${today.getMonth()+1<10? '0': ''}${today.getMonth() + 1}-${today.getDate()<10?'0': ''}${today.getDate()}`);
 setDate($('#toDate'), today);
 $('#toDate').attr('max', `${today.getFullYear()}-${today.getMonth()+1<10? '0': ''}${today.getMonth() + 1}-${today.getDate()<10?'0': ''}${today.getDate()}`);
-$('#toDate').attr('min', `${today.getFullYear()}-${today.getMonth()+1<10? '0': ''}${today.getMonth() + 1}-${today.getDate()<10?'0': ''}${today.getDate()}`);
+$('#toDate').attr('min', `${new Date(filters.fromDate).getFullYear()}-${new Date(filters.fromDate).getMonth()+1<10? '0': ''}${new Date(filters.fromDate).getMonth() + 1}-${new Date(filters.fromDate).getDate()<10?'0': ''}${new Date(filters.fromDate).getDate()}`);
 
 
 
@@ -275,5 +277,6 @@ if (!sessionStorage.getItem('token')) {
     window.location = "/";
 } else {
     token = sessionStorage.getItem('token');
+    $('#generateExcel').attr('href', `/reports/registro_de_datos?token=${token}&fromDate=${filters.fromDate}&toDate=${filters.toDate}`);
     render();
 }

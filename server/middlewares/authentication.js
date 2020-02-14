@@ -27,7 +27,26 @@ let verifyToken = (req, res, next) => {
 };
 
 
+// ===============================================
+// Verify token by url
+// ===============================================
+let verifyTokenByURL = (req, res, next) => {
+    let token = String(req.query.token);
+
+    jwt.verify(token, process.env.SEED, (err, decoded) => {
+        if (err) {
+            return res.status(400).json({
+                err
+            });
+        } else {
+            req.user = decoded.user;
+            next();
+        }
+    });
+};
+
 
 module.exports = {
-    verifyToken
+    verifyToken,
+    verifyTokenByURL
 }

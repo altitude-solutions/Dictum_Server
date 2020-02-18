@@ -331,7 +331,7 @@ app.get('/lineaDeCredito/:id', verifyToken, (req, res) => {
 // ===============================================
 app.get('/lineaDeCredito', verifyToken, (req, res) => {
     let offset = req.query.from || 0;
-    let limit = req.query.to || 1000;
+    let limit = req.query.to || 10000;
     let where = {};
     if (req.query.status) {
         let status = Number(req.query.status)

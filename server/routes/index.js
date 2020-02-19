@@ -41,5 +41,9 @@ app.use(require('./operadorBase'));
 // Report generator
 app.use(require('./reportGenerator'));
 
+// Repo updater
+app.use(require('./app/updateRepo'));
+
+
 
 module.exports = app;

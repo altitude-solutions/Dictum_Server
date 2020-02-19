@@ -21,11 +21,19 @@ let verifyToken = (req, res, next) => {
             });
         } else {
             req.user = decoded.user;
-            next();
+
+            if( req.user.nombreUsuario != undefined && req.user.nombreReal != undefined && req.user.permisos != undefined ) {
+                next();
+            } else {
+                return res.status(400).json({
+                    err: {
+                        message: 'Usuario no identificado'
+                    }
+                });
+            }
         }
     });
 };
-
 
 // ===============================================
 // Verify token by url
@@ -40,7 +48,16 @@ let verifyTokenByURL = (req, res, next) => {
             });
         } else {
             req.user = decoded.user;
-            next();
+
+            if( req.user.nombreUsuario != undefined && req.user.nombreReal != undefined && req.user.permisos != undefined ) {
+                next();
+            } else {
+                return res.status(400).json({
+                    err: {
+                        message: 'Usuario no identificado'
+                    }
+                });
+            }
         }
     });
 };

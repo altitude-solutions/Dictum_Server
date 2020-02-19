@@ -26,6 +26,7 @@ app.use(require('./login'));
 
 // Finanzas
 app.use(require('./finanzas'));
+app.use(require('./LineasDeCredito'));
 app.use(require('./PlanesDePago'));
 
 // Operador de radio

@@ -109,5 +109,4 @@ app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
 });
 
 
-
 module.exports = app;

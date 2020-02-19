@@ -168,8 +168,6 @@ app.put('/tipo_de_vehiculo/:id', verifyToken, (req, res) => {
     }
 });
 
-// TODO: Delete tipo de vehiculo
-
 // ===============================================
 // Create CodigoTipoDeVehiculo
 // ===============================================
@@ -331,7 +329,6 @@ app.put('/cod_tipo/:id', verifyToken, (req, res) => {
         });
     }
 });
-// TODO: Delete codigos tipo de vehiculo
 
 // ===============================================
 // Create vehicle

@@ -1,7 +1,17 @@
 const { Sequelize } = require('sequelize');
 
-const sql = new Sequelize('DICTUM', 'root', 'Altitude2020', {
-// const sql = new Sequelize('DICTUM', 'root', 'm4r14db-r00t-89', {
+let db_user = '';
+let db_password = '';
+
+if (process.env.NODE_ENV != 'dev') {
+    db_user =  process.env.DICTUM_USER;
+    db_password = process.env.DICTUM_PASS;
+} else {
+    db_user = 'root';
+    db_password = 'Altitude2020';
+}
+
+const sql = new Sequelize('DICTUM', db_user, db_password, {
     host: 'localhost',
     dialect: 'mariadb',
     logging: false,

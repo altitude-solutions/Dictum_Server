@@ -30,17 +30,58 @@ app.post('/planDePagos', verifyToken, (req, res) => {
     if (user.permisos.includes('fin_escribir')) {
         if (body.numeroDeContratoOperacion && body.monto && body.fechaFirma && body.moneda && body.plazo && body.frecuenciaDePagos && body.empresaGrupo && body.entidadFinanciera) {
             if (body.lineaDeCredito) {
-                // TODO: VALIDAR EN CASO DE QUE LA LINEA DE CREDITO ESTE SOBRE-GIRADA
-                PlanDePagos.create(body)
-                    .then(saved => {
-                        res.json({
-                            planDePagos: saved
+                LineasDeCredito.findByPk(body.lineaDeCredito)
+                .then(lineaDB => {
+                    PlanDePagos.findAll({
+                        where: {
+                            lineaDeCredito: body.lineaDeCredito
+                        }
+                    })
+                        .then(operaciones => {
+                            let lineaDeCredito_creditLimit = lineaDB.toJSON().monto;
+
+                            operaciones.forEach(element => {
+                                let op_aux = element.toJSON();
+                                lineaDeCredito_creditLimit -= op_aux.monto;
+                            });
+
+                            if(lineaDeCredito_creditLimit >= body.monto) {
+                                if(lineaDB.fechaVencimiento >= body.fechaVencimiento) {
+                                    PlanDePagos.create(body)
+                                        .then(saved => {
+                                            res.json({
+                                                planDePagos: saved
+                                            });
+                                        }).catch(err => {
+                                            res.status(500).json({
+                                                err
+                                            });
+                                        });
+                                }else{
+                                    return res.status(400).json({
+                                        err: {
+                                            message: `La fecha de vencimiento de la línea de crédito es anterior que la finalización operación\nFecha de vencimiento: ${new Date(lineaDB.fechaVencimiento).getDate()}/${new Date(lineaDB.fechaVencimiento).getMonth()+1}/${new Date(lineaDB.fechaVencimiento).getFullYear()}`
+                                        }
+                                    });
+                                }
+                            }else{
+                                return res.status(400).json({
+                                    err: {
+                                        message: `El saldo de la línea de crédito es insuficiente para sustentar esta operación\nSaldo: ${lineaDeCredito_creditLimit} ${lineaDB.moneda}`
+                                    }
+                                });
+                            }
+                        }).catch(err => {
+                            return res.status(500).json({
+                                err
+                            });
                         });
-                    }).catch(err => {
-                        res.status(500).json({
-                            err
-                        });
+                })
+                .catch(err => {
+                    return res.status(500).json({
+                        err
                     });
+                });
             } else {
                 PlanDePagos.create(body)
                     .then(saved => {

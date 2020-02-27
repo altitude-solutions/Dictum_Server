@@ -129,7 +129,7 @@ PlanDePagos.belongsTo(EntidadFinanciera, {
 
 
 // ===============================================
-// Cuota model
+// Cuota plan de pagos model
 // ===============================================
 class CuotaPlanDePagos extends Model {};
 CuotaPlanDePagos.init({
@@ -172,10 +172,57 @@ CuotaPlanDePagos.belongsTo(PlanDePagos, {
     foreignKey: 'parent'
 });
 
+
+// ===============================================
+// Cuota efectiva model
+// ===============================================
+class CuotaEfectiva extends Model {};
+CuotaEfectiva.init({
+    id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    numeroDeCuota: {
+        type: DataTypes.INTEGER
+    },
+    fechaDePago: {
+        type: DataTypes.BIGINT
+    },
+    montoTotalDelPago: {
+        type: DataTypes.FLOAT
+    },
+    pagoDeCapital: {
+        type: DataTypes.FLOAT
+    },
+    pagoDeInteres: {
+        type: DataTypes.FLOAT
+    },
+    pagoDeIva: {
+        type: DataTypes.FLOAT
+    },
+    estado: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    }
+}, {
+    sequelize: sql,
+    timestamps: false,
+    tableName: 'cuotas_efectivas',
+    modelName: 'cuotas_efectivas'
+});
+
+CuotaEfectiva.belongsTo(PlanDePagos, {
+    foreignKey: 'parent'
+});
+
+
 // ===============================================
 // Export models
 // ===============================================
 module.exports = {
     PlanDePagos,
-    CuotaPlanDePagos
+    CuotaPlanDePagos,
+    CuotaEfectiva
 };

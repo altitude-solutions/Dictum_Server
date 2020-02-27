@@ -24,7 +24,7 @@ const { verifyToken } = require('../middlewares/authentication');
 // ===============================================
 const { EntidadFinanciera, TipoDeEntidad, EmpresaGrupo } = require('../Models/Finanzas/General');
 const { LineasDeCredito } = require('../Models/Finanzas/LineasDeCredito');
-const { PlanDePagos, CuotaPlanDePagos } = require('../Models/Finanzas/PlanDePagos');
+const { PlanDePagos, CuotaPlanDePagos, CuotaEfectiva } = require('../Models/Finanzas/PlanDePagos');
 
 app.post('/planDePagos', verifyToken, (req, res) => {
     let body = req.body;
@@ -199,7 +199,7 @@ app.get('/planDePagos/:id', verifyToken, (req, res) => {
             }]
         })
             .then(planDePagos => {
-                if(!planDePagos) {
+                if (!planDePagos) {
                     return res.status(404).json({
                         err: {
                             message: 'Plan de pagos no encontrado'
@@ -209,24 +209,45 @@ app.get('/planDePagos/:id', verifyToken, (req, res) => {
                 planDePagos = planDePagos.toJSON();
                 CuotaPlanDePagos.findAll({
                     where: {
-                        parent: planDePagos.id
+                        parent: planDePagos.id,
+                        estado: true
                     }
                 })
-                .then(cuotasDB => {
-                    let cuotas = [];
-                    cuotasDB.forEach(element => {
-                        cuotas.push(element.toJSON());
+                    .then(cuotasDB => {
+                        let cuotas = [];
+                        cuotasDB.forEach(element => {
+                            cuotas.push(element.toJSON());
+                        });
+                        planDePagos.cuotasPlan = cuotas;
+
+                        CuotaEfectiva.findAll({
+                            where: {
+                                parent: planDePagos.id,
+                                estado: true
+                            }
+                        })
+                            .then(cuotasEfecDB => {
+                                let cuotas_efe = [];
+                                cuotasEfecDB.forEach(element => {
+                                    cuotas_efe.push(element.toJSON());
+                                });
+                                planDePagos.cuotasEfectivas = cuotas_efe;
+
+                                res.json({
+                                    planDePagos
+                                });
+                            })
+                            .catch(err => {
+                                return res.status(500).json({
+                                    err
+                                });
+                            });
+                    })
+                    .catch(err => {
+                        return res.status(500).json({
+                            err
+                        });
                     });
-                    planDePagos.cuotas = cuotas;
-                    res.json({
-                        planDePagos
-                    });
-                })
-                .catch(err => {
-                    return res.status(500).json({
-                        err
-                    });
-                });
             })
             .catch(err => {
                 return res.status(500).json({
@@ -274,5 +295,101 @@ app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
     }
 });
 
+
+app.post('/cuotaEfectiva', verifyToken, (req, res) => {
+    let body = req.body;
+    let user = req.user;
+    if (user.permisos.includes('fin_escribir')) {
+        if (body.numeroDeCuota && body.fechaDePago && body.montoTotalDelPago && body.parent) {
+            CuotaEfectiva.create(body)
+                .then(saved => {
+                    res.json({
+                        cuotaEfectiva: saved
+                    });
+                }).catch(err => {
+                    res.status(500).json({
+                        err
+                    });
+                });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'El plan de pagos asociado, el número de cuota, la fecha del pago y el monto son necesarios'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+app.put('/cuotaEfectiva/:id', verifyToken, (req, res) => {
+    let body = req.body;
+    let user = req.user;
+    let id = Number(req.params.id);
+
+    if (user.permisos.includes('fin_modificar')) {
+        if (body.numeroDeCuota && body.fechaDePago && body.montoTotalDelPago && body.parent) {
+            CuotaEfectiva.update(body, {
+                where: {
+                    id
+                }
+            }).then(affected => {
+                    res.json({
+                        affected
+                    });
+                }).catch(err => {
+                    res.status(500).json({
+                        err
+                    });
+                });
+        } else {
+            res.status(400).json({
+                err: {
+                    message: 'El plan de pagos asociado, el número de cuota, la fecha del pago y el monto son necesarios'
+                }
+            });
+        }
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+app.delete('/cuotaEfectiva/:id', verifyToken, (req, res) => {
+    let user = req.user;
+    let id = Number(req.params.id);
+
+    if (user.permisos.includes('fin_borrar')) {
+        CuotaEfectiva.update({
+            estado: false
+        }, {
+            where: {
+                id
+            }
+        }).then(affected => {
+            res.json({
+                affected
+            });
+        }).catch(err => {
+            res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
 
 module.exports = app;

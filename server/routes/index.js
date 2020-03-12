@@ -24,11 +24,6 @@ app.use(require('./proyectos'));
 // login
 app.use(require('./login'));
 
-// Finanzas
-app.use(require('./finanzas'));
-app.use(require('./LineasDeCredito'));
-app.use(require('./PlanesDePago'));
-
 // Operador de radio
 app.use(require('./operadorRadio'));
 
@@ -40,10 +35,6 @@ app.use(require('./operadorBase'));
 
 // Report generator
 app.use(require('./reportGenerator'));
-
-// Repo updater
-app.use(require('./app/updateRepo'));
-
 
 
 module.exports = app;

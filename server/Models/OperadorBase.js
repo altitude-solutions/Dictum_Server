@@ -75,8 +75,6 @@ OperadorBase.belongsTo(Ruta, {
     foreignKey: 'ruta_id'
 });
 
-sql.sync();
-
 module.exports = {
     OperadorBase
 };

@@ -207,7 +207,7 @@ app.post('/ruta_vehiculo', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('ru_escribir')) {
-        if (body.ruta && body.movil) {
+        if (body.ruta_id && body.movil) {
             VehiculosRutas.create(body)
                 .then(linkDB => {
                     res.json({

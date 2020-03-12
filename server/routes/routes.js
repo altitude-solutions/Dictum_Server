@@ -30,7 +30,7 @@ app.post('/ruta', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('ru_escribir')) {
-        if (body.ruta && body.servicio && body.tipoDeVehiculos) {
+        if (body.ruta && body.servicio_id && body.tipoDeVehiculos) {
             Ruta.create(body)
                 .then(rutaDB => {
                     res.json({

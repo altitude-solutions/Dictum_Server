@@ -33,6 +33,7 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
     // ===============================================
     if (user.permisos.includes('es_escribir')) {
         if (body.movil == 'Bidon' || body.movil == 'Otros') {
+            // No way to validate
             VentaDeCombustible.create(body)
                 .then(savedDB => {
                     res.json({
@@ -45,12 +46,14 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
                     });
                 });
         } else {
+            // Look for latest register for this vehicle
             VentaDeCombustible.max('fechaYHora', {
                 where: {
                     movil: body.movil
                 }
             }).then(maxValue => {
                 if (!maxValue) {
+                    //  if there isn't a register then don't validate
                     VentaDeCombustible.create(body)
                         .then(saved => {
                             res.json({
@@ -63,24 +66,28 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
                             });
                         });
                 } else {
+                    // if there is a register retrieve it
                     VentaDeCombustible.findOne({
                         where: {
                             movil: body.movil,
                             fechaYHora: maxValue
                         }
                     }).then(lastReg => {
+                        // validate this register's kilometer cannot be less than last register's kilometer
                         if (Number(body.kilometraje) < Number(lastReg.toJSON().kilometraje)) {
                             res.json({
                                 errKm: `El kilometraje no puede ser menor al kilometraje del anterior registro (${lastReg.toJSON().kilometraje}Km)`,
                                 saved: false
                             });
                         } else {
+                            // validate this register's kilometer cannot be more than last register's kilometer plus 500[Km]
                             if (Number(body.kilometraje) > (Number(lastReg.toJSON().kilometraje) + 500)) {
                                 res.json({
                                     errKm: `El recorrido no puede ser mayor a 500Km (${lastReg.toJSON().kilometraje}Km)`,
                                     saved: false
                                 });
                             } else {
+                                // if no problem is found then create register
                                 VentaDeCombustible.create(body)
                                     .then(saved => {
                                         res.json({
@@ -115,7 +122,7 @@ app.post('/ventaCombustible', verifyToken, (req, res) => {
     }
 });
 
-
+// Get current user data
 app.get('/ventaCombustible', verifyToken, (req, res) => {
     let offset = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 1000;
@@ -156,6 +163,7 @@ app.get('/ventaCombustible', verifyToken, (req, res) => {
     }
 });
 
+// Get paginated data from all users
 app.get('/estacionDeServicio', verifyToken,  (req, res) => {
     let offset = Number(req.query.from) || 0;
     let limit = Number(req.query.to) || 1000;

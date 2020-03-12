@@ -82,7 +82,7 @@ app.post('/login', (req, res) => {
                 correo: DbUser.correo
             }
         }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
-        console.log(`${DbUser.nombreUsuario}(${DbUser.nombreReal}) ingresó al sistema: ${new Date().toLocaleString()}`);
+        // console.log(`${DbUser.nombreUsuario}(${DbUser.nombreReal}) ingresó al sistema: ${new Date().toLocaleString()}`);
         return res.json({
             user: {
                 nombreUsuario: DbUser.nombreUsuario,

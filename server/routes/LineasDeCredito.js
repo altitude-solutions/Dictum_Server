@@ -124,6 +124,9 @@ app.get('/lineaDeCredito', verifyToken, (req, res) => {
     if (req.query.entidad) {
         where.entidad = Number(req.query.entidad);
     }
+    if (req.query.empresa) {
+        where.empresaGrupo = Number(req.query.empresa);
+    }
     let user = req.user;
     if (user.permisos.includes('fin_leer')) {
         LineasDeCredito.findAndCountAll({

@@ -36,29 +36,36 @@ app.post('/planDePagos', verifyToken, (req, res) => {
                     .then(lineaDB => {
                         PlanDePagos.findAll({
                             where: {
-                                lineaDeCredito: body.lineaDeCredito
+                                lineaDeCredito: body.lineaDeCredito,
+                                estado: true
                             }
                         })
                             .then(operaciones => {
                                 let lineaDeCredito_creditLimit = lineaDB.toJSON().monto;
-
                                 operaciones.forEach(element => {
                                     let op_aux = element.toJSON();
                                     lineaDeCredito_creditLimit -= op_aux.monto;
                                 });
-
                                 if (lineaDeCredito_creditLimit >= body.monto) {
                                     if (lineaDB.fechaVencimiento >= body.fechaVencimiento) {
-                                        PlanDePagos.create(body)
-                                            .then(saved => {
-                                                res.json({
-                                                    planDePagos: saved
+                                        if(body.fechaFirma >= lineaDB.fechaFirma) {
+                                            PlanDePagos.create(body)
+                                                .then(saved => {
+                                                    res.json({
+                                                        planDePagos: saved
+                                                    });
+                                                }).catch(err => {
+                                                    res.status(500).json({
+                                                        err
+                                                    });
                                                 });
-                                            }).catch(err => {
-                                                res.status(500).json({
-                                                    err
-                                                });
+                                        }else{
+                                            return res.status(400).json({
+                                                err: {
+                                                    message: `La fecha de firma de la operación es anterior que la fecha de creación de la línea de crédito\nFecha de firma: ${new Date(lineaDB.fechaFirma).getDate()}/${new Date(lineaDB.fechaFirma).getMonth() + 1}/${new Date(lineaDB.fechaFirma).getFullYear()}`
+                                                }
                                             });
+                                        }
                                     } else {
                                         return res.status(400).json({
                                             err: {
@@ -126,6 +133,9 @@ app.get('/planDePagos', verifyToken, (req, res) => {
     let whereGlobal = {};
     let whereEntidades = {};
     let whereEmpresas = {};
+    if (req.query.status != undefined) {
+        whereGlobal.estado = Number(req.query.status) == 1 ? true : false;
+    }
     if (req.query.q != undefined) {
         whereGlobal.numeroDeContratoOperacion = {
             [Op.regexp]: req.query.q
@@ -264,17 +274,100 @@ app.get('/planDePagos/:id', verifyToken, (req, res) => {
 });
 
 
+app.delete('/planDePagos/:id', verifyToken, (req, res) => {
+    let user = req.user;
+    let id = Number(req.params.id);
+
+    if (user.permisos.includes('fin_leer')) {
+        PlanDePagos.update({
+            estado: false
+        }, {
+            where: {
+                id
+            }
+        })
+        .then(opsDeleted => {
+            CuotaPlanDePagos.update({
+                estado: false
+            },{
+                where:{
+                    parent:id
+                }
+            })
+            .then(duesDeleted => {
+                return res.json({
+                    opsDeleted,
+                    duesDeleted
+                });
+            })
+            .catch(err => {
+                return res.status(500).json({
+                    err
+                });
+            });
+        })
+        .catch(err => {
+            return res.status(500).json({
+                err
+            });
+        });
+    } else {
+        res.status(403).json({
+            err: {
+                message: 'Acceso denegado'
+            }
+        });
+    }
+});
+
+
 app.post('/cuotaPlanDePagos', verifyToken, (req, res) => {
     let body = req.body;
     let user = req.user;
     if (user.permisos.includes('fin_escribir')) {
         if (body.numeroDeCuota && body.fechaDePago && body.montoTotalDelPago && body.parent) {
-            CuotaPlanDePagos.create(body)
-                .then(saved => {
-                    res.json({
-                        cuotaPlanDePagos: saved
+            CuotaPlanDePagos.findAll({
+                where: {
+                    parent: Number(body.parent),
+                    estado: true
+                }
+            })
+                .then(thisPlanCuotas => {
+                    let thisPlanCuotas_Spend = 0;
+
+                    thisPlanCuotas.forEach(element => {
+                        thisPlanCuotas_Spend += element.toJSON().pagoDeCapital;
                     });
-                }).catch(err => {
+
+                    PlanDePagos.findByPk(body.parent)
+                        .then(thisParent => {
+                            let diff = thisParent.toJSON().monto - thisPlanCuotas_Spend;
+                            if(body.pagoDeCapital <= diff) {
+                                CuotaPlanDePagos.create(body)
+                                    .then(saved => {
+                                        res.json({
+                                            cuotaPlanDePagos: saved
+                                        });
+                                    }).catch(err => {
+                                        res.status(500).json({
+                                            err
+                                        });
+                                    });
+                            }else{
+                                res.status(400).json({
+                                    err: {
+                                        message: `El pago de capital no puede superar el saldo de la operación\nSaldo: ${diff} ${thisParent.moneda}`
+                                    }
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            res.status(500).json({
+                                err
+                            });
+                        });
+                })
+                .catch(err => {
                     res.status(500).json({
                         err
                     });
